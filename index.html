@@ -1184,6 +1184,17 @@
     padding: 12px;
     line-height: 1.8;
   }
+  .footer-help-link {
+    color: #a0a0a0;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.2s;
+    cursor: pointer;
+  }
+  .footer-help-link:hover {
+    color: var(--chinese);
+    text-decoration: underline;
+  }
 
   /* 账号弹窗 */
   /* 账号表单 */
@@ -1266,6 +1277,112 @@
   }
   .account-switch a:hover { text-decoration: underline; }
 
+  /* 帮助/说明弹窗 */
+  .help-modal { max-width: 680px; max-height: 85vh; overflow-y: auto; }
+  .help-section { margin-bottom: 16px; }
+  .help-section h3 {
+    font-size: 15px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .help-section p, .help-section li {
+    font-size: 13px;
+    color: var(--text-light);
+    line-height: 1.8;
+  }
+  .help-section ul { padding-left: 18px; }
+  .help-section ul li { margin-bottom: 2px; }
+  .version-timeline { position: relative; padding-left: 16px; }
+  .version-timeline::before {
+    content: '';
+    position: absolute;
+    left: 4px;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    background: var(--border);
+    border-radius: 1px;
+  }
+  .version-item { margin-bottom: 14px; position: relative; }
+  .version-item::before {
+    content: '';
+    position: absolute;
+    left: -14px;
+    top: 6px;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--chinese);
+  }
+  .version-item.major::before { background: var(--math); width: 10px; height: 10px; left: -15px; }
+  .version-tag {
+    font-size: 11px;
+    font-weight: 700;
+    padding: 1px 8px;
+    border-radius: 10px;
+    margin-right: 6px;
+    vertical-align: middle;
+  }
+  .version-tag.major { background: var(--math-light); color: var(--math); }
+  .version-tag.minor { background: var(--chinese-light); color: var(--chinese); }
+  .version-date { font-size: 11px; color: #b0b0b0; margin-left: 4px; }
+  .version-desc { font-size: 12px; color: var(--text-light); margin-top: 4px; padding-left: 4px; }
+  .version-desc ul { margin: 0; padding-left: 16px; }
+  .version-desc li { font-size: 12px; line-height: 1.6; }
+
+  /* 欢迎引导弹窗 */
+  .welcome-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10000;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.3s;
+  }
+  .welcome-overlay.show { opacity: 1; pointer-events: auto; }
+  .welcome-card {
+    background: var(--card-bg);
+    border-radius: 20px;
+    padding: 28px 24px 20px;
+    max-width: 400px;
+    width: 90%;
+    text-align: center;
+    box-shadow: 0 16px 48px rgba(0,0,0,0.2);
+    animation: welcomeIn 0.4s ease-out;
+  }
+  @keyframes welcomeIn {
+    from { transform: translateY(30px) scale(0.95); opacity: 0; }
+    to { transform: translateY(0) scale(1); opacity: 1; }
+  }
+  .welcome-icon { font-size: 56px; margin-bottom: 12px; }
+  .welcome-title { font-size: 22px; font-weight: 900; color: var(--text); margin-bottom: 8px; }
+  .welcome-subtitle { font-size: 13px; color: var(--text-light); margin-bottom: 20px; line-height: 1.6; }
+  .welcome-btns { display: flex; flex-direction: column; gap: 10px; }
+  .welcome-btn {
+    padding: 12px;
+    border: none;
+    border-radius: 14px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--font);
+    transition: all 0.2s;
+  }
+  .welcome-btn.primary { background: var(--success); color: white; }
+  .welcome-btn.primary:hover { background: #5ab868; }
+  .welcome-btn.secondary { background: var(--card-bg); color: var(--chinese); border: 2px solid var(--chinese); }
+  .welcome-btn.secondary:hover { background: var(--chinese-light); }
+  .welcome-btn.tertiary { background: transparent; color: var(--text-light); font-size: 13px; }
+  .welcome-btn.tertiary:hover { color: var(--text); }
+
+
   @media (max-width: 480px) {
     .toolbar { padding: 8px 12px; }
     .toolbar button { padding: 6px 10px; font-size: 11px; }
@@ -1347,11 +1464,12 @@
   </div>
 
   <div class="footer-tip">
-    点击任务卡片完成打卡 | 完成任务后可填写得分 | 长按标题/学科/地图可自定义 | 登录后可云端同步
+    <a href="javascript:void(0)" onclick="openHelpModal()" class="footer-help-link">📖 点击查看使用说明及更新</a>
   </div>
 </div>
 
 <input type="file" id="importInput" accept=".json" style="display:none" onchange="handleImport(this)">
+
 
 <!-- 奖励/记录弹窗 -->
 <div class="modal-overlay" id="rewardModal" onclick="closeModal(event)">
@@ -1521,6 +1639,39 @@
           还没有账号？<a href="javascript:void(0)" onclick="switchAccountMode('register')">立即注册</a>
         </div>
       </div>
+    </div>
+  </div>
+</div>
+
+<!-- 帮助/说明弹窗 -->
+<div class="modal-overlay" id="helpModal" onclick="closeHelpModal(event)">
+  <div class="modal help-modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title">📖 学习地图</div>
+      <button class="modal-close" onclick="closeHelpModal()">×</button>
+    </div>
+    <div class="modal-tabs">
+      <button class="modal-tab active" data-tab="help-about" onclick="switchHelpTab('help-about')">功能说明</button>
+      <button class="modal-tab" data-tab="help-guide" onclick="switchHelpTab('help-guide')">使用说明</button>
+      <button class="modal-tab" data-tab="help-changelog" onclick="switchHelpTab('help-changelog')">更新记录</button>
+    </div>
+    <div class="modal-body" id="helpModalBody"></div>
+  </div>
+</div>
+
+<!-- 欢迎引导弹窗 -->
+<div class="welcome-overlay" id="welcomeOverlay">
+  <div class="welcome-card">
+    <div class="welcome-icon">🗺️</div>
+    <div class="welcome-title">欢迎来到学习地图！</div>
+    <div class="welcome-subtitle">
+      这是属于子菡的暑假学习冒险<br>每天打卡，点亮地图，赢取星星奖励！
+    </div>
+    <div class="welcome-btns">
+      <button class="welcome-btn primary" onclick="welcomeAction('register')">🌟 注册账号，云端同步</button>
+      <button class="welcome-btn secondary" onclick="welcomeAction('login')">🔑 已有账号，立即登录</button>
+      <button class="welcome-btn secondary" onclick="welcomeAction('help')">📖 查看使用说明</button>
+      <button class="welcome-btn tertiary" onclick="welcomeAction('skip')">先看看，稍后再说</button>
     </div>
   </div>
 </div>
@@ -3257,6 +3408,153 @@ async function tryAutoLogin() {
   }
 }
 
+// ========== 帮助弹窗 ==========
+let currentHelpTab = 'help-about';
+
+function openHelpModal() {
+  currentHelpTab = 'help-about';
+  document.querySelectorAll('#helpModal .modal-tab').forEach((btn, i) => {
+    btn.classList.toggle('active', i === 0);
+  });
+  renderHelpBody();
+  document.getElementById('helpModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeHelpModal(e) {
+  if (e && e.target !== document.getElementById('helpModal')) return;
+  document.getElementById('helpModal').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function switchHelpTab(tab) {
+  currentHelpTab = tab;
+  document.querySelectorAll('#helpModal .modal-tab').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.tab === tab);
+  });
+  renderHelpBody();
+}
+
+function renderHelpBody() {
+  const body = document.getElementById('helpModalBody');
+  if (currentHelpTab === 'help-about') {
+    body.innerHTML = `
+      <div class="help-section">
+        <h3>🗺️ 学习地图是什么？</h3>
+        <p>学习地图是亲子打卡互动工具。通过每日打卡完成学习任务，点亮地图板块，赚取星星奖励，在星星商店兑换心仪的奖品！</p>
+      </div>
+      <div class="help-section">
+        <h3>⭐ 核心功能</h3>
+        <ul>
+          <li><b>每日打卡</b> — 点击任务卡片完成打卡，支持填写得分（如考试分数）</li>
+          <li><b>冒险地图</b> — 打卡越多，地图板块点亮越多，可视化学习进度</li>
+          <li><b>星星奖励</b> — 完成打卡、高分任务、里程碑都能获得星星</li>
+          <li><b>星星商店</b> — 用星星兑换奖励（短剧、电影、水上乐园等）</li>
+          <li><b>云端同步</b> — 注册账号后数据自动备份到云端，多设备同步</li>
+          <li><b>自定义编辑</b> — 长按标题/学科/地图/任务可自定义修改</li>
+        </ul>
+      </div>
+      <div class="help-section">
+        <h3>🔐 云端账号</h3>
+        <p>注册一个简单账号（姓名+密码），你的学习数据会自动同步到云端。换设备时登录同一账号即可恢复所有数据，再也不用担心丢失！</p>
+      </div>
+    `;
+  } else if (currentHelpTab === 'help-guide') {
+    body.innerHTML = `
+      <div class="help-section">
+        <h3>📋 每日打卡</h3>
+        <p>点击任务卡片即可完成/取消打卡。如果任务有得分项（如考试），打卡后会出现"填写得分"按钮，输入分数即可。</p>
+      </div>
+      <div class="help-section">
+        <h3>📅 选择日期</h3>
+        <p>使用日期导航栏的 ◀ ▶ 按钮切换日期，可以补打卡之前遗漏的任务。点击日历图标可以快速跳转到任意日期。</p>
+      </div>
+      <div class="help-section">
+        <h3>🎁 星星商店</h3>
+        <p>顶部统计栏点击星星数量，或点击"星星商店"按钮进入。选择心仪奖品，设置数量，点击兑换即可消耗星星。</p>
+      </div>
+      <div class="help-section">
+        <h3>✏️ 自定义编辑</h3>
+        <ul>
+          <li><b>标题/副标题</b> — 长按（或悬停后出现提示）顶部标题区域</li>
+          <li><b>学科名称/图标</b> — 长按学科标题区域</li>
+          <li><b>地图名称/起终点</b> — 长按地图区域</li>
+          <li><b>任务内容</b> — 点击科目下方的"新增任务"或长按已有任务</li>
+        </ul>
+      </div>
+      <div class="help-section">
+        <h3>💾 备份与恢复</h3>
+        <p>顶部工具栏提供"备份"（下载JSON文件）和"恢复"（上传JSON文件）功能。即使不登录账号，也能手动备份数据。</p>
+      </div>
+    `;
+  } else if (currentHelpTab === 'help-changelog') {
+    body.innerHTML = `
+      <div class="version-timeline">
+        <div class="version-item major">
+          <span class="version-tag major">大版本 v3</span><span class="version-date">2025年7月</span>
+          <div class="version-desc">
+            <ul>
+              <li>🌟 云端账号系统：注册/登录/登出，数据自动同步到 GitHub Gist</li>
+              <li>🎨 Toolbar UI 重构：登录状态与备份恢复统一布局</li>
+              <li>📖 新增帮助说明页面（功能说明/使用说明/更新记录）</li>
+              <li>🎵 内置背景音乐（欢快节奏）</li>
+              <li>👋 首次访问欢迎引导页</li>
+              <li>🔐 Token 安全方案：GitHub Actions + Secrets 自动部署</li>
+            </ul>
+          </div>
+        </div>
+        <div class="version-item major">
+          <span class="version-tag major">大版本 v2</span><span class="version-date">2025年7月</span>
+          <div class="version-desc">
+            <ul>
+              <li>⭐ 星星商店系统：兑换奖励、兑换记录、星星明细</li>
+              <li>🗺️ 冒险地图可视化：打卡进度地图板块</li>
+              <li>🏆 里程碑奖励系统：连续打卡额外星星</li>
+              <li>🎉 庆祝动画：满分/里程碑达成特效</li>
+              <li>✏️ 全面自定义编辑：标题、学科、地图、任务、商品</li>
+            </ul>
+          </div>
+        </div>
+        <div class="version-item major">
+          <span class="version-tag major">大版本 v1</span><span class="version-date">2025年7月</span>
+          <div class="version-desc">
+            <ul>
+              <li>📋 每日打卡系统：数学/语文/英语三大科目</li>
+              <li>📅 日期导航：支持补打卡和历史回顾</li>
+              <li>📊 统计面板：完成度、星星数、点亮天数</li>
+              <li>💾 本地备份/恢复：JSON 文件导入导出</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+}
+
+// ========== 欢迎引导弹窗 ==========
+function checkFirstVisit() {
+  const visited = localStorage.getItem('zihan_visited');
+  return !visited;
+}
+
+function showWelcome() {
+  document.getElementById('welcomeOverlay').classList.add('show');
+}
+
+function welcomeAction(action) {
+  document.getElementById('welcomeOverlay').classList.remove('show');
+  localStorage.setItem('zihan_visited', '1');
+  
+  if (action === 'register') {
+    openAccountModal('register');
+  } else if (action === 'login') {
+    openAccountModal('login');
+  } else if (action === 'help') {
+    openHelpModal();
+  }
+  // 'skip' — 什么都不做，仅标记已访问
+}
+
 // ========== 初始化 ==========
 ensureMeta();
 migrateMeta();
@@ -3264,6 +3562,11 @@ updateAccountUI();
 // 先渲染本地数据，再尝试自动登录
 renderAll();
 tryAutoLogin();
+
+// 首次访问：弹出欢迎引导
+if (checkFirstVisit()) {
+  setTimeout(() => showWelcome(), 600);
+}
 
 // 每分钟检查跨天
 setInterval(() => {
