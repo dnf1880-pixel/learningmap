@@ -1119,6 +1119,75 @@
     font-weight: 700;
     color: var(--text);
     white-space: nowrap;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    transition: background 0.2s;
+    position: relative;
+    user-select: none;
+  }
+  .toolbar-user:hover { background: rgba(0,0,0,0.05); }
+  .toolbar-user.clickable { cursor: pointer; }
+  .toolbar-user .arrow { font-size: 10px; margin-left: 2px; opacity: 0.5; }
+
+  /* 账号切换下拉菜单 */
+  .account-dropdown {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    margin-top: 4px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+    min-width: 180px;
+    z-index: 1000;
+    overflow: hidden;
+  }
+  .account-dropdown-header {
+    font-size: 11px;
+    color: var(--text-light);
+    padding: 10px 14px 6px;
+    font-weight: 600;
+  }
+  .account-dropdown-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 8px 14px;
+    font-size: 13px;
+    cursor: pointer;
+    transition: background 0.15s;
+    border: none;
+    background: none;
+    width: 100%;
+    text-align: left;
+    font-family: var(--font);
+    color: var(--text);
+  }
+  .account-dropdown-item:hover { background: rgba(0,0,0,0.04); }
+  .account-dropdown-item.active { font-weight: 700; color: var(--success); }
+  .account-dropdown-item .check { color: var(--success); font-size: 14px; }
+  .account-dropdown-footer {
+    border-top: 1px solid var(--border);
+    padding: 6px;
+  }
+  .account-dropdown-footer button {
+    width: 100%;
+    padding: 8px;
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    background: transparent;
+    font-size: 12px;
+    cursor: pointer;
+    font-family: var(--font);
+    color: var(--text-light);
+    transition: all 0.2s;
+  }
+  .account-dropdown-footer button:hover {
+    border-color: var(--success);
+    color: var(--success);
+    background: var(--success-light);
   }
   .toolbar button {
     background: var(--card-bg);
@@ -1140,6 +1209,7 @@
   .btn-login:hover { background: #5ab868 !important; color: white !important; }
   .btn-logout { background: var(--math); color: white !important; border: none !important; font-weight: 600; }
   .btn-logout:hover { background: #e55a5a !important; color: white !important; }
+  .toolbar-btn-hidden { display: none !important; }
   .sync-dot {
     display: inline-block;
     width: 8px; height: 8px;
@@ -1455,7 +1525,7 @@
     <div class="toolbar-left">
       <span class="toolbar-user" id="toolbarUser">👤 未登录</span>
       <button class="btn-login" id="btnLogin" onclick="openAccountModal('login')">登录</button>
-      <button class="btn-logout" id="btnLogout" onclick="logout()" style="display:none;">退出</button>
+      <button class="btn-logout toolbar-btn-hidden" id="btnLogout" onclick="logout()">退出</button>
     </div>
     <div class="toolbar-right">
       <button onclick="exportData()">📤 备份</button>
@@ -1871,6 +1941,7 @@ const SHOP_ICONS = {
 
 // ========== 状态 ==========
 let currentDate = getTodayStr();
+let currentAccount = ''; // 当前活跃账号名
 let data = loadData();
 let lastAllDone = false;
 let editTags = [];
@@ -1908,21 +1979,144 @@ function ensureMeta() {
   return data.__meta;
 }
 
-function loadData() {
-  try {
-    const raw = localStorage.getItem('zihan_learning_map');
-    const parsed = raw ? JSON.parse(raw) : {};
-    ensureMetaInData(parsed);
-    return parsed;
-  } catch { return { __meta: { transactions: [], milestonesClaimed: [], version: 3 } }; }
-}
-
+// ========== 多账号数据层 ==========
 function ensureMetaInData(d) {
   if (!d.__meta) d.__meta = { transactions: [], milestonesClaimed: [], version: 3 };
 }
 
+function getStorageKey(name) {
+  return 'zihan_data_' + name;
+}
+
+function getSavedAccounts() {
+  try {
+    const raw = localStorage.getItem('zihan_saved_accounts');
+    return raw ? JSON.parse(raw) : [];
+  } catch { return []; }
+}
+
+function saveSavedAccounts(accounts) {
+  localStorage.setItem('zihan_saved_accounts', JSON.stringify(accounts));
+}
+
+function addSavedAccount(name, passwordHash) {
+  const accounts = getSavedAccounts();
+  const idx = accounts.findIndex(a => a.name === name);
+  if (idx >= 0) {
+    accounts[idx].passwordHash = passwordHash;
+  } else {
+    accounts.push({ name, passwordHash });
+  }
+  saveSavedAccounts(accounts);
+}
+
+function removeSavedAccount(name) {
+  const accounts = getSavedAccounts().filter(a => a.name !== name);
+  saveSavedAccounts(accounts);
+}
+
+function getActiveAccount() {
+  return localStorage.getItem('zihan_active_account') || '';
+}
+
+function setActiveAccount(name) {
+  currentAccount = name;
+  if (name) {
+    localStorage.setItem('zihan_active_account', name);
+  } else {
+    localStorage.removeItem('zihan_active_account');
+  }
+}
+
+function loadData() {
+  const name = getActiveAccount();
+  if (name) {
+    try {
+      const raw = localStorage.getItem(getStorageKey(name));
+      const parsed = raw ? JSON.parse(raw) : {};
+      ensureMetaInData(parsed);
+      currentAccount = name;
+      return parsed;
+    } catch { currentAccount = name; return { __meta: { transactions: [], milestonesClaimed: [], version: 3 } }; }
+  }
+  // 兼容旧数据迁移
+  try {
+    const raw = localStorage.getItem('zihan_learning_map');
+    if (raw) {
+      const parsed = JSON.parse(raw);
+      ensureMetaInData(parsed);
+      // 迁移到默认账号
+      const defaultName = '子菡';
+      localStorage.setItem(getStorageKey(defaultName), JSON.stringify(parsed));
+      localStorage.removeItem('zihan_learning_map');
+      setActiveAccount(defaultName);
+      return parsed;
+    }
+  } catch {}
+  currentAccount = '';
+  return { __meta: { transactions: [], milestonesClaimed: [], version: 3 } };
+}
+
 function saveData() {
-  localStorage.setItem('zihan_learning_map', JSON.stringify(data));
+  if (currentAccount) {
+    localStorage.setItem(getStorageKey(currentAccount), JSON.stringify(data));
+  } else {
+    // 未登录账号时使用兼容 key
+    localStorage.setItem('zihan_learning_map', JSON.stringify(data));
+  }
+}
+
+function switchAccount(name) {
+  if (name === currentAccount) return;
+  // 保存当前数据
+  if (currentAccount) {
+    saveData();
+  }
+  // 加载目标数据
+  const raw = localStorage.getItem(getStorageKey(name));
+  data = raw ? JSON.parse(raw) : { __meta: { transactions: [], milestonesClaimed: [], version: 3 } };
+  ensureMetaInData(data);
+  migrateMeta();
+  setActiveAccount(name);
+  
+  // 尝试恢复云端登录状态
+  const accounts = getSavedAccounts();
+  const saved = accounts.find(a => a.name === name);
+  if (saved) {
+    // 本地有凭证，尝试云端自动登录
+    cloudUser = null;
+    tryAutoLoginForAccount(name, saved.passwordHash);
+  } else {
+    cloudUser = null;
+  }
+  
+  saveData();
+  updateAccountUI();
+  renderAll();
+}
+
+// 为指定账号尝试自动登录
+async function tryAutoLoginForAccount(name, passwordHash) {
+  try {
+    const usersObj = await loadCloudUsers();
+    const user = usersObj.users.find(u => u.name === name && u.passwordHash === passwordHash);
+    if (user) {
+      cloudUser = user;
+      const cloudData = await loadUserData(cloudUser);
+      // 云端数据优先
+      if (cloudData && cloudData.__meta) {
+        data = cloudData;
+        ensureMeta();
+        migrateMeta();
+        saveData();
+      }
+      updateAccountUI();
+      renderAll();
+      console.log('自动登录成功:', name);
+    }
+  } catch(e) {
+    console.warn('自动登录失败，使用本地数据', e);
+  }
 }
 
 function getDayData(dateStr) {
@@ -3316,8 +3510,9 @@ async function handleAccountSubmit() {
       data = cloudData;
       ensureMeta();
       migrateMeta();
+      setActiveAccount(name);
+      addSavedAccount(name, hashPassword(password));
       saveData();
-      localStorage.setItem('zihan_cloud_user', JSON.stringify({ name, passwordHash: hashPassword(password) }));
       hint.textContent = '注册成功！数据已同步到云端';
       hint.className = 'account-hint';
     } else {
@@ -3325,14 +3520,12 @@ async function handleAccountSubmit() {
       if (!result.ok) { hint.textContent = result.error; hint.className = 'account-hint error'; btn.disabled = false; btn.textContent = '登录'; return; }
       cloudUser = result.user;
       const cloudData = await loadUserData(cloudUser);
-      // 合并策略：云端数据优先，但保留本地未同步的修改
-      const localData = data;
       data = cloudData;
       ensureMeta();
       migrateMeta();
-      // 如果本地有更新版本的数据（通过时间判断），提示用户
+      setActiveAccount(name);
+      addSavedAccount(name, hashPassword(password));
       saveData();
-      localStorage.setItem('zihan_cloud_user', JSON.stringify({ name, passwordHash: hashPassword(password) }));
       hint.textContent = '登录成功！已加载云端数据';
       hint.className = 'account-hint';
     }
@@ -3362,8 +3555,15 @@ async function handleAccountSubmit() {
 
 function logout() {
   if (!confirm('退出登录后本地数据将保留，但不会同步到云端。确定退出吗？')) return;
+  // 保存当前数据
+  if (currentAccount) saveData();
+  removeSavedAccount(cloudUser.name);
   cloudUser = null;
-  localStorage.removeItem('zihan_cloud_user');
+  setActiveAccount('');
+  // 加载一个空数据（未登录状态）
+  data = { __meta: { transactions: [], milestonesClaimed: [], version: 4 } };
+  ensureMeta();
+  migrateMeta();
   updateAccountUI();
   renderAll();
 }
@@ -3372,36 +3572,108 @@ function updateAccountUI() {
   const userEl = document.getElementById('toolbarUser');
   const loginBtn = document.getElementById('btnLogin');
   const logoutBtn = document.getElementById('btnLogout');
+  
   if (cloudUser) {
-    userEl.innerHTML = '<span class="sync-dot synced"></span>👤 ' + escapeHtml(cloudUser.name);
-    loginBtn.style.display = 'none';
-    logoutBtn.style.display = '';
+    const accounts = getSavedAccounts();
+    userEl.innerHTML = '<span class="sync-dot synced"></span>👤 ' + escapeHtml(cloudUser.name) + (accounts.length > 1 ? ' <span class="arrow">▾</span>' : '');
+    userEl.classList.add('clickable');
+    userEl.onclick = function(e) { e.stopPropagation(); toggleAccountDropdown(); };
+    loginBtn.classList.add('toolbar-btn-hidden');
+    logoutBtn.classList.remove('toolbar-btn-hidden');
   } else {
     userEl.textContent = '👤 未登录';
-    loginBtn.style.display = '';
-    logoutBtn.style.display = 'none';
+    userEl.classList.remove('clickable');
+    userEl.onclick = null;
+    loginBtn.classList.remove('toolbar-btn-hidden');
+    logoutBtn.classList.add('toolbar-btn-hidden');
+    // 关闭下拉
+    closeAccountDropdown();
+  }
+}
+
+// ========== 账号切换下拉 ==========
+function toggleAccountDropdown() {
+  const existing = document.getElementById('accountDropdown');
+  if (existing) { closeAccountDropdown(); return; }
+  
+  const accounts = getSavedAccounts();
+  if (accounts.length <= 1 && cloudUser) return; // 只有一个账号无需下拉
+  
+  const userEl = document.getElementById('toolbarUser');
+  const dd = document.createElement('div');
+  dd.id = 'accountDropdown';
+  dd.className = 'account-dropdown';
+  
+  let itemsHtml = '';
+  accounts.forEach(a => {
+    const isActive = currentAccount === a.name;
+    itemsHtml += `<button class="account-dropdown-item${isActive ? ' active' : ''}" onclick="event.stopPropagation(); selectAccount('${escapeHtml(a.name)}')">
+      <span>👤 ${escapeHtml(a.name)}</span>
+      ${isActive ? '<span class="check">✓</span>' : ''}
+    </button>`;
+  });
+  
+  dd.innerHTML = `
+    <div class="account-dropdown-header">切换账号</div>
+    ${itemsHtml}
+    <div class="account-dropdown-footer">
+      <button onclick="event.stopPropagation(); closeAccountDropdown(); openAccountModal('login')">+ 添加账号</button>
+    </div>
+  `;
+  
+  userEl.style.position = 'relative';
+  userEl.appendChild(dd);
+  
+  // 点击其他地方关闭
+  setTimeout(() => {
+    document.addEventListener('click', closeAccountDropdown, { once: true });
+  }, 0);
+}
+
+function closeAccountDropdown() {
+  const dd = document.getElementById('accountDropdown');
+  if (dd) dd.remove();
+}
+
+function selectAccount(name) {
+  closeAccountDropdown();
+  if (name === currentAccount && cloudUser) return;
+  
+  // 保存当前数据
+  if (currentAccount) saveData();
+  
+  const accounts = getSavedAccounts();
+  const saved = accounts.find(a => a.name === name);
+  if (saved) {
+    // 切换到目标账号
+    switchAccount(name);
   }
 }
 
 async function tryAutoLogin() {
-  const saved = localStorage.getItem('zihan_cloud_user');
+  // 优先从 zihan_active_account 恢复
+  const activeAccount = getActiveAccount();
+  if (!activeAccount) return;
+  
+  const accounts = getSavedAccounts();
+  const saved = accounts.find(a => a.name === activeAccount);
   if (!saved) return;
+  
   try {
-    const cred = JSON.parse(saved);
-    const result = await loginUser(cred.name, '');
-    // 不能用空密码登录，改用 hash 匹配
     const usersObj = await loadCloudUsers();
-    const user = usersObj.users.find(u => u.name === cred.name && u.passwordHash === cred.passwordHash);
+    const user = usersObj.users.find(u => u.name === activeAccount && u.passwordHash === saved.passwordHash);
     if (user) {
       cloudUser = user;
       const cloudData = await loadUserData(cloudUser);
-      data = cloudData;
-      ensureMeta();
-      migrateMeta();
-      saveData();
+      if (cloudData && cloudData.__meta) {
+        data = cloudData;
+        ensureMeta();
+        migrateMeta();
+        saveData();
+      }
       updateAccountUI();
       renderAll();
-      console.log('自动登录成功:', cred.name);
+      console.log('自动登录成功:', activeAccount);
     }
   } catch(e) {
     console.warn('自动登录失败，将使用本地数据', e);
