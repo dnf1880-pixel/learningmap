@@ -1205,9 +1205,9 @@
     background: #f0e6dc;
     color: var(--text);
   }
-  .btn-login { background: var(--success); color: white !important; border: none !important; font-weight: 600; }
+  .btn-login { background: var(--success) !important; color: white !important; border: none !important; font-weight: 600; }
   .btn-login:hover { background: #5ab868 !important; color: white !important; }
-  .btn-logout { background: var(--math); color: white !important; border: none !important; font-weight: 600; }
+  .btn-logout { background: var(--math) !important; color: white !important; border: none !important; font-weight: 600; }
   .btn-logout:hover { background: #e55a5a !important; color: white !important; }
   .toolbar-btn-hidden { display: none !important; }
   .sync-dot {
@@ -2045,12 +2045,11 @@ function loadData() {
     if (raw) {
       const parsed = JSON.parse(raw);
       ensureMetaInData(parsed);
-      // 迁移到默认账号
+      // 迁移到默认账号但不自动登录
       const defaultName = '子菡';
       localStorage.setItem(getStorageKey(defaultName), JSON.stringify(parsed));
       localStorage.removeItem('zihan_learning_map');
-      setActiveAccount(defaultName);
-      return parsed;
+      // 不自动设 active account，等用户手动登录
     }
   } catch {}
   currentAccount = '';
@@ -3575,7 +3574,7 @@ function updateAccountUI() {
   
   if (cloudUser) {
     const accounts = getSavedAccounts();
-    userEl.innerHTML = '<span class="sync-dot synced"></span>👤 ' + escapeHtml(cloudUser.name) + (accounts.length > 1 ? ' <span class="arrow">▾</span>' : '');
+    userEl.innerHTML = '<span class="sync-dot synced"></span>👤 ' + escapeHtml(cloudUser.name) + ' <span class="arrow">▾</span>';
     userEl.classList.add('clickable');
     userEl.onclick = function(e) { e.stopPropagation(); toggleAccountDropdown(); };
     loginBtn.classList.add('toolbar-btn-hidden');
@@ -3597,7 +3596,6 @@ function toggleAccountDropdown() {
   if (existing) { closeAccountDropdown(); return; }
   
   const accounts = getSavedAccounts();
-  if (accounts.length <= 1 && cloudUser) return; // 只有一个账号无需下拉
   
   const userEl = document.getElementById('toolbarUser');
   const dd = document.createElement('div');
