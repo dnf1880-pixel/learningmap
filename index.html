@@ -86,7 +86,10 @@
     position: relative;
     transform: rotate(-1deg);
     animation: floatBadge 3s ease-in-out infinite;
+    cursor: pointer;
+    user-select: none;
   }
+  .header-badge:active { transform: scale(0.98); }
   @keyframes floatBadge {
     0%, 100% { transform: rotate(-1deg) translateY(0); }
     50% { transform: rotate(1deg) translateY(-4px); }
@@ -98,9 +101,6 @@
     text-shadow: 2px 2px 0 #fff, 4px 4px 0 rgba(255,107,107,0.15);
     letter-spacing: 1px;
     white-space: nowrap;
-  }
-  .header .title span {
-    color: var(--chinese);
   }
   .header .subtitle {
     font-size: 13px;
@@ -129,6 +129,11 @@
   @keyframes twinkle {
     0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.7; }
     50% { transform: scale(1.3) rotate(15deg); opacity: 1; }
+  }
+  .long-press-hint {
+    font-size: 10px;
+    color: #c0b8b0;
+    margin-top: 6px;
   }
 
   /* ===== 统计条 ===== */
@@ -214,7 +219,13 @@
     align-items: center;
     gap: 10px;
     margin-bottom: 12px;
+    cursor: pointer;
+    user-select: none;
+    padding: 4px;
+    border-radius: 12px;
+    transition: background 0.2s;
   }
+  .subject-header:hover { background: rgba(0,0,0,0.02); }
   .subject-icon {
     width: 40px;
     height: 40px;
@@ -226,15 +237,16 @@
     color: white;
     flex-shrink: 0;
   }
-  .subject-icon.math { background: var(--math); }
-  .subject-icon.chinese { background: var(--chinese); }
-  .subject-icon.english { background: var(--english); }
-
   .subject-name { font-size: 18px; font-weight: 700; }
   .subject-progress {
     font-size: 12px;
     color: var(--text-light);
     margin-left: auto;
+  }
+  .subject-hint {
+    font-size: 10px;
+    color: #c0b8b0;
+    margin-left: 6px;
   }
 
   /* ===== 任务卡片 ===== */
@@ -404,6 +416,15 @@
     flex-wrap: wrap;
     gap: 10px;
   }
+  .overview-title-wrap {
+    cursor: pointer;
+    user-select: none;
+    padding: 4px 8px;
+    margin-left: -8px;
+    border-radius: 10px;
+    transition: background 0.2s;
+  }
+  .overview-title-wrap:hover { background: rgba(0,0,0,0.02); }
   .overview-title {
     font-size: 18px;
     font-weight: 800;
@@ -528,7 +549,7 @@
     font-weight: 700;
   }
 
-  /* 日历网格 - 3排紧凑版 */
+  /* 日历网格 - 8列自适应 */
   .calendar-grid {
     display: grid;
     grid-template-columns: repeat(8, 1fr);
@@ -711,11 +732,26 @@
     position: relative;
     overflow: hidden;
     transition: transform 0.2s, box-shadow 0.2s;
+    cursor: pointer;
+    user-select: none;
   }
   .shop-item:hover {
     transform: translateY(-2px);
     box-shadow: 0 4px 14px rgba(0,0,0,0.08);
   }
+  .shop-item.add-item {
+    border-style: dashed;
+    border-color: #c0d8c0;
+    background: transparent;
+    justify-content: center;
+    min-height: 160px;
+  }
+  .shop-item.add-item .shop-item-icon {
+    background: #f0f0f0;
+    font-size: 32px;
+    color: #aaa;
+  }
+  .shop-item.add-item .shop-item-name { color: #999; }
   .shop-item-icon {
     width: 56px;
     height: 56px;
@@ -783,76 +819,13 @@
     color: #aaa;
     cursor: not-allowed;
   }
-
-  .shop-item.custom {
-    grid-column: span 1;
-    background: linear-gradient(135deg, #fffef9, #f0fafa);
-    flex-direction: column;
-    align-items: center;
-    text-align: center;
-    padding: 14px 10px 12px;
-  }
-  .shop-item.custom .custom-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 14px;
-    background: #f3e8ff;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 28px;
-  }
-  .shop-item.custom .custom-title {
-    font-size: 15px;
-    font-weight: 800;
-  }
-  .shop-item.custom .custom-row {
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-    width: 100%;
-    margin-top: 2px;
-  }
-  .shop-item.custom input {
-    width: 100%;
-    padding: 7px 8px;
-    border: 1px solid var(--border);
-    border-radius: 8px;
-    font-size: 13px;
-    text-align: center;
-    font-family: var(--font);
-    background: white;
-  }
-  .shop-item.custom input.name {
-    font-weight: 700;
-    font-size: 14px;
-  }
-  .shop-item.custom .custom-price-row {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 3px;
-    font-size: 12px;
-    color: var(--text-light);
-  }
-  .shop-item.custom .custom-price-row input {
-    width: 50px;
-    padding: 6px 4px;
-    font-weight: 700;
-  }
-  .shop-item.custom .custom-price-row input.unit {
-    width: 42px;
-  }
-  .shop-item.custom .custom-price-row span {
-    white-space: nowrap;
-  }
-  .shop-item.custom button {
-    width: 100%;
-    margin-top: 2px;
+  .shop-item-hint {
+    font-size: 9px;
+    color: #c0b8b0;
   }
 
-  /* ===== 任务编辑弹窗 ===== */
-  .task-editor-overlay {
+  /* ===== 通用编辑弹窗 ===== */
+  .editor-overlay {
     position: fixed;
     inset: 0;
     background: rgba(0,0,0,0.35);
@@ -864,11 +837,11 @@
     align-items: flex-end;
     justify-content: center;
   }
-  .task-editor-overlay.show {
+  .editor-overlay.show {
     opacity: 1;
     pointer-events: auto;
   }
-  .task-editor {
+  .editor {
     background: var(--card-bg);
     width: 100%;
     max-width: 520px;
@@ -880,27 +853,43 @@
     flex-direction: column;
     overflow: hidden;
   }
-  .task-editor-overlay.show .task-editor { transform: translateY(0); }
-  .task-editor-header {
+  .editor-overlay.show .editor { transform: translateY(0); }
+  .editor-header {
     padding: 20px 20px 14px;
     border-bottom: 1px solid var(--border);
     display: flex;
     justify-content: space-between;
     align-items: center;
   }
-  .task-editor-title { font-size: 18px; font-weight: 800; }
-  .task-editor-close {
+  .editor-title { font-size: 18px; font-weight: 800; }
+  .editor-close {
     width: 32px; height: 32px; border-radius: 50%;
     border: 1px solid var(--border); background: white;
     cursor: pointer; font-size: 18px; color: var(--text-light);
   }
-  .task-editor-body { padding: 16px 20px 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 14px; }
-  .task-editor-body label { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: -10px; }
-  .task-editor-body input, .task-editor-body select {
+  .editor-body { padding: 16px 20px 20px; overflow-y: auto; flex: 1; display: flex; flex-direction: column; gap: 14px; }
+  .editor-body label { font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: -10px; }
+  .editor-body input, .editor-body select {
     width: 100%; padding: 10px 12px; border: 1px solid var(--border);
     border-radius: 10px; font-size: 14px; font-family: var(--font); outline: none;
   }
-  .task-editor-body input:focus, .task-editor-body select:focus { border-color: var(--success); }
+  .editor-body input:focus, .editor-body select:focus { border-color: var(--success); }
+  .editor-body .hint {
+    font-size: 11px;
+    color: #b0a8a0;
+    margin-top: -8px;
+  }
+  .editor-actions { display: flex; gap: 10px; }
+  .editor-actions button {
+    flex: 1; padding: 12px; border: none; border-radius: 12px;
+    font-weight: 700; font-size: 14px; cursor: pointer; font-family: var(--font);
+  }
+  .editor-actions button.save { background: var(--success); color: white; }
+  .editor-actions button.save:hover { background: #5ab868; }
+  .editor-actions button.delete { background: var(--math); color: white; }
+  .editor-actions button.delete:hover { background: #e55a5a; }
+  .editor-actions button.add { background: var(--chinese); color: white; }
+  .editor-actions button.add:hover { background: #3db8b0; }
   .icon-picker {
     display: flex; flex-wrap: wrap; gap: 8px;
   }
@@ -927,22 +916,51 @@
     position: absolute; right: 4px; top: 50%; transform: translateY(-50%);
     font-size: 10px; cursor: pointer; opacity: 0.7;
   }
-  .task-editor-actions { display: flex; gap: 10px; }
-  .task-editor-actions button {
-    flex: 1; padding: 12px; border: none; border-radius: 12px;
-    font-weight: 700; font-size: 14px; cursor: pointer; font-family: var(--font);
-  }
-  .task-editor-actions button.save { background: var(--success); color: white; }
-  .task-editor-actions button.save:hover { background: #5ab868; }
-  .task-editor-actions button.delete { background: var(--math); color: white; }
-  .task-editor-actions button.delete:hover { background: #e55a5a; }
-  .task-editor-actions button.add { background: var(--chinese); color: white; }
-  .task-editor-actions button.add:hover { background: #3db8b0; }
   .task-card .task-actions-hint {
     display: none; position: absolute; bottom: 4px; right: 10px;
     font-size: 10px; color: var(--text-light); opacity: 0.6;
   }
   .task-card:hover .task-actions-hint { display: block; }
+
+  /* 里程碑编辑行 */
+  .milestone-row {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    background: white;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid var(--border);
+  }
+  .milestone-row input {
+    width: 70px;
+    padding: 8px;
+    text-align: center;
+  }
+  .milestone-row span {
+    font-size: 12px;
+    color: var(--text-light);
+    white-space: nowrap;
+  }
+  .milestone-row button {
+    margin-left: auto;
+    padding: 6px 10px;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    background: var(--card-bg);
+    cursor: pointer;
+    font-size: 12px;
+  }
+  .add-milestone-btn {
+    padding: 10px;
+    border: 1px dashed var(--border);
+    border-radius: 10px;
+    background: white;
+    cursor: pointer;
+    font-size: 13px;
+    color: var(--text-light);
+    font-weight: 700;
+  }
 
   /* 兑换庆祝粒子 */
   .coin-burst {
@@ -1101,15 +1119,11 @@
     .shop-item-icon { width: 44px; height: 44px; border-radius: 10px; }
     .shop-item-icon svg { width: 32px; height: 32px; }
     .shop-item-name { font-size: 13px; }
-    .shop-item.custom { grid-column: span 1; padding: 10px 8px 10px; }
-    .shop-item.custom .custom-icon { width: 44px; height: 44px; border-radius: 10px; font-size: 24px; }
-    .shop-item.custom .custom-main { width: 100%; }
-    .shop-item.custom .custom-row { flex-direction: column; gap: 6px; }
-    .shop-item.custom .custom-row input { width: 100%; }
-    .shop-item.custom button { width: 100%; }
     .overview-actions button { padding: 6px 12px; font-size: 11px; }
-    .task-editor-body { padding: 12px 14px 16px; gap: 10px; }
+    .editor-body { padding: 12px 14px 16px; gap: 10px; }
     .icon-picker .icon-opt { width: 36px; height: 36px; font-size: 18px; }
+    .milestone-row { padding: 8px; }
+    .milestone-row input { width: 60px; padding: 6px; }
   }
 
   .footer-tip {
@@ -1132,10 +1146,14 @@
       <span class="header-deco d3">🌟</span>
       <span class="header-deco d4">⭐</span>
     </div>
-    <div class="header-badge">
-      <div class="title">子菡的<span>学习冒险地图</span></div>
+    <div class="header-badge" id="headerBadge"
+         onpointerdown="handleTitlePointerDown(event)"
+         onpointerup="handleTitlePointerUp()"
+         onpointerleave="handleTitlePointerLeave()">
+      <div class="title" id="headerTitle">子菡的学习冒险地图</div>
     </div>
-    <div class="subtitle">每天前进一小步，暑假收获一大步</div>
+    <div class="subtitle" id="headerSubtitle">每天前进一小步，暑假收获一大步</div>
+    <div class="long-press-hint">长按标题可以修改文字</div>
   </div>
 
   <div class="stats-bar" id="statsBar"></div>
@@ -1151,9 +1169,12 @@
   <!-- 日历总览 -->
   <div class="overview-section">
     <div class="overview-header">
-      <div>
-        <div class="overview-title"><span class="icon">★</span>暑假挑战地图</div>
-        <div class="overview-subtitle">7月24日 - 8月15日 · 完成全部8项点亮一天</div>
+      <div class="overview-title-wrap"
+           onpointerdown="handleMapPointerDown(event)"
+           onpointerup="handleMapPointerUp()"
+           onpointerleave="handleMapPointerLeave()">
+        <div class="overview-title"><span class="icon">★</span><span id="mapTitleText">暑假挑战地图</span></div>
+        <div class="overview-subtitle" id="mapSubtitle">7月24日 - 8月15日 · 完成全部8项点亮一天</div>
       </div>
       <div class="overview-actions">
         <button onclick="openRecords('earn')">星星明细</button>
@@ -1180,7 +1201,7 @@
   </div>
 
   <div class="footer-tip">
-    点击任务卡片完成打卡 | 完成任务后可填写得分 | 数据自动保存在浏览器中
+    点击任务卡片完成打卡 | 完成任务后可填写得分 | 长按标题/学科/地图可自定义 | 数据自动保存在浏览器中
   </div>
 </div>
 
@@ -1212,13 +1233,13 @@
 </div>
 
 <!-- 任务编辑弹窗 -->
-<div class="task-editor-overlay" id="taskEditorOverlay" onclick="closeTaskEditor(event)">
-  <div class="task-editor" onclick="event.stopPropagation()">
-    <div class="task-editor-header">
-      <div class="task-editor-title" id="taskEditorTitle">编辑任务</div>
-      <button class="task-editor-close" onclick="closeTaskEditor()">×</button>
+<div class="editor-overlay" id="taskEditorOverlay" onclick="closeTaskEditor(event)">
+  <div class="editor" onclick="event.stopPropagation()">
+    <div class="editor-header">
+      <div class="editor-title" id="taskEditorTitle">编辑任务</div>
+      <button class="editor-close" onclick="closeTaskEditor()">×</button>
     </div>
-    <div class="task-editor-body">
+    <div class="editor-body">
       <label>图标</label>
       <div class="icon-picker" id="iconPicker"></div>
       <label>任务名称</label>
@@ -1226,11 +1247,7 @@
       <label>任务量说明</label>
       <input type="text" id="editTaskDetail" placeholder="例如：每天完成2页">
       <label>所属科目</label>
-      <select id="editTaskSubject">
-        <option value="math">数学</option>
-        <option value="chinese">语文</option>
-        <option value="english">英语</option>
-      </select>
+      <select id="editTaskSubject" onchange="handleTaskSubjectChange(this)"></select>
       <label>标签</label>
       <div class="tag-editor-row">
         <input type="text" id="editTagText" placeholder="标签文字">
@@ -1244,19 +1261,116 @@
         <button onclick="addTagToEdit()">+添加</button>
       </div>
       <div class="tag-preview" id="tagPreview"></div>
-      <label>
-        <input type="checkbox" id="editHasScore" onchange="document.getElementById('editScoreLabel').style.display=this.checked?'block':'none'"> 需要评分
-      </label>
-      <input type="text" id="editScoreLabel" placeholder="得分标签（如：得分 0-100）" style="display:none">
-      <label>额外激励（满分额外星星）</label>
-      <input type="number" id="editBonus" value="5" min="0" max="50" placeholder="满分额外星星数">
-      <div class="task-editor-actions" id="taskEditorActions"></div>
+      <label>得分标签（留空表示不需要评分）</label>
+      <input type="text" id="editScoreLabel" placeholder="例如：得分 0-100">
+      <label>满分额外星星</label>
+      <input type="number" id="editBonus" value="5" min="0" max="50" placeholder="不需要评分可填0">
+      <div class="editor-actions" id="taskEditorActions"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 商品编辑弹窗 -->
+<div class="editor-overlay" id="shopEditorOverlay" onclick="closeShopEditor(event)">
+  <div class="editor" onclick="event.stopPropagation()">
+    <div class="editor-header">
+      <div class="editor-title" id="shopEditorTitle">编辑商品</div>
+      <button class="editor-close" onclick="closeShopEditor()">×</button>
+    </div>
+    <div class="editor-body">
+      <label>图标</label>
+      <div class="icon-picker" id="shopIconPicker"></div>
+      <label>商品名称</label>
+      <input type="text" id="editShopName" placeholder="例如：许愿币">
+      <label>价格（每单位多少星星）</label>
+      <input type="number" id="editShopPrice" value="1" min="1" placeholder="1">
+      <label>单位（如：颗、集、部）</label>
+      <input type="text" id="editShopUnit" placeholder="颗">
+      <label>默认兑换数量</label>
+      <input type="number" id="editShopQty" value="1" min="1" placeholder="1">
+      <div class="editor-actions" id="shopEditorActions"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 学科编辑弹窗 -->
+<div class="editor-overlay" id="subjectEditorOverlay" onclick="closeSubjectEditor(event)">
+  <div class="editor" onclick="event.stopPropagation()">
+    <div class="editor-header">
+      <div class="editor-title" id="subjectEditorTitle">编辑学科</div>
+      <button class="editor-close" onclick="closeSubjectEditor()">×</button>
+    </div>
+    <div class="editor-body">
+      <label>学科图标</label>
+      <div class="icon-picker" id="subjectIconPicker"></div>
+      <label>学科名称</label>
+      <input type="text" id="editSubjectName" placeholder="例如：数学" maxlength="10">
+      <div class="editor-actions" id="subjectEditorActions"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 地图编辑弹窗 -->
+<div class="editor-overlay" id="mapEditorOverlay" onclick="closeMapEditor(event)">
+  <div class="editor" onclick="event.stopPropagation()">
+    <div class="editor-header">
+      <div class="editor-title" id="mapEditorTitle">编辑地图</div>
+      <button class="editor-close" onclick="closeMapEditor()">×</button>
+    </div>
+    <div class="editor-body">
+      <label>地图标题</label>
+      <input type="text" id="editMapTitle" placeholder="例如：暑假挑战地图" maxlength="20">
+      <label>起始日期</label>
+      <input type="date" id="editMapStart">
+      <label>结束日期</label>
+      <input type="date" id="editMapEnd">
+      <div class="hint">日期范围最长不超过3个自然月</div>
+      <label>里程碑奖励</label>
+      <div id="milestoneEditorList"></div>
+      <button class="add-milestone-btn" onclick="addMilestoneRow()">+ 添加里程碑</button>
+      <div class="editor-actions" id="mapEditorActions"></div>
+    </div>
+  </div>
+</div>
+
+<!-- 标题编辑弹窗 -->
+<div class="editor-overlay" id="titleEditorOverlay" onclick="closeTitleEditor(event)">
+  <div class="editor" onclick="event.stopPropagation()">
+    <div class="editor-header">
+      <div class="editor-title">修改标题</div>
+      <button class="editor-close" onclick="closeTitleEditor()">×</button>
+    </div>
+    <div class="editor-body">
+      <label>标题文字（不超过10个字）</label>
+      <input type="text" id="editTitle" placeholder="例如：子菡的学习冒险地图" maxlength="10">
+      <div class="editor-actions">
+        <button class="save" onclick="saveTitle()">保存</button>
+      </div>
     </div>
   </div>
 </div>
 
 <script>
-// ========== 配置 ==========
+// ========== 默认配置 ==========
+const DEFAULT_TITLE = '子菡的学习冒险地图';
+const DEFAULT_MAP_TITLE = '暑假挑战地图';
+const DEFAULT_SUBTITLE = '每天前进一小步，暑假收获一大步';
+const DEFAULT_CHALLENGE_START = '2025-07-24';
+const DEFAULT_CHALLENGE_END = '2025-08-15';
+
+const DEFAULT_SUBJECTS = [
+  { key: 'math', name: '数学', icon: '🧮', cls: 'math' },
+  { key: 'chinese', name: '语文', icon: '📜', cls: 'chinese' },
+  { key: 'english', name: '英语', icon: '🌍', cls: 'english' },
+];
+
+const SUBJECT_COLORS = {
+  math: '#ff6b6b',
+  chinese: '#4ecdc4',
+  english: '#f4a742',
+};
+const EXTRA_SUBJECT_COLORS = ['#ff85a1', '#a78bfa', '#60a5fa', '#34d399', '#fbbf24', '#fb923c', '#22d3ee', '#a3e635'];
+
 const DEFAULT_TASKS = [
   { id: 'math-paper', subject: 'math', emoji: '📐', name: '数学活页练习', detail: '每天完成2页活页练习', tags: [{text:'每天2页',cls:'pages'},{text:'批注得分',cls:'score'}], hasScore: true, scoreLabel: '得分 (0-100)', bonusStars: 5 },
   { id: 'chinese-preview', subject: 'chinese', emoji: '📖', name: '语文预习知识点', detail: '每天预习2页三年级知识点', tags: [{text:'每天2页',cls:'pages'},{text:'每日',cls:'daily'}], hasScore: false, scoreLabel: '', bonusStars: 0 },
@@ -1268,7 +1382,25 @@ const DEFAULT_TASKS = [
   { id: 'english-ef', subject: 'english', emoji: '🎧', name: '英孚学习', detail: '每天学习20分钟英孚课程', tags: [{text:'20分钟',cls:'time'},{text:'每日',cls:'daily'}], hasScore: false, scoreLabel: '', bonusStars: 0 }
 ];
 
+const DEFAULT_MILESTONES = [
+  { days: 3, reward: 10 },
+  { days: 5, reward: 15 },
+  { days: 7, reward: 20 },
+  { days: 10, reward: 25 },
+  { days: 15, reward: 30 },
+];
+
+const DEFAULT_SHOP_ITEMS = [
+  { id: 'wishcoin', name: '许愿币', price: 1, unit: '颗', qty: 1, icon: 'wishcoin' },
+  { id: 'drama', name: '短剧', price: 1, unit: '集', qty: 1, icon: 'drama' },
+  { id: 'movie', name: '看电影', price: 5, unit: '部', qty: 1, icon: 'movie' },
+  { id: 'waterpark', name: '水上乐园', price: 10, unit: '次', qty: 1, icon: 'waterpark' },
+  { id: 'game', name: '蛋仔派对', price: 1, unit: '分钟', qty: 1, icon: 'game' },
+];
+
 const ICON_OPTIONS = ['📐','📖','📝','🎨','📚','🔤','📱','🎧','✏️','🎯','🧩','🎵','🎮','🏃','🧪','🔬','🎭','🌿','🐾','💡'];
+const SUBJECT_ICON_OPTIONS = ['🧮','📜','🌍','🔢','✏️','🎨','🎵','🔬','🧩','📐','🌟','🚀'];
+const SHOP_ICON_KEYS = ['wishcoin', 'drama', 'movie', 'waterpark', 'game', 'star', 'crown', 'gift', 'icecream', 'balloon'];
 
 function loadTasks() {
   const meta = ensureMeta();
@@ -1285,34 +1417,86 @@ function saveTasks(tasks) {
   saveData();
 }
 
-function getTasks() {
-  return loadTasks();
+function getTasks() { return loadTasks(); }
+
+function getSettings() {
+  const meta = ensureMeta();
+  if (!meta.settings) {
+    meta.settings = JSON.parse(JSON.stringify({
+      title: DEFAULT_TITLE,
+      mapTitle: DEFAULT_MAP_TITLE,
+      subtitle: DEFAULT_SUBTITLE,
+      startDate: DEFAULT_CHALLENGE_START,
+      endDate: DEFAULT_CHALLENGE_END,
+      subjects: DEFAULT_SUBJECTS,
+      milestones: DEFAULT_MILESTONES,
+    }));
+    saveData();
+  }
+  return meta.settings;
 }
 
-const SUBJECTS = [
-  { key: 'math', name: '数学', icon: '🧮', cls: 'math' },
-  { key: 'chinese', name: '语文', icon: '📜', cls: 'chinese' },
-  { key: 'english', name: '英语', icon: '🌍', cls: 'english' },
-];
+function saveSettings(settings) {
+  const meta = ensureMeta();
+  meta.settings = settings;
+  saveData();
+}
 
-const CHALLENGE_START = '2025-07-24';
-const CHALLENGE_END = '2025-08-15';
+function getSubjects() { return getSettings().subjects || []; }
+function saveSubjects(subjects) {
+  const settings = getSettings();
+  settings.subjects = subjects;
+  saveSettings(settings);
+}
 
-const MILESTONES = [
-  { days: 3, reward: 10 },
-  { days: 5, reward: 15 },
-  { days: 7, reward: 20 },
-  { days: 10, reward: 25 },
-  { days: 15, reward: 30 },
-];
+function getMilestones() { return getSettings().milestones || []; }
+function getChallengeStart() { return getSettings().startDate || DEFAULT_CHALLENGE_START; }
+function getChallengeEnd() { return getSettings().endDate || DEFAULT_CHALLENGE_END; }
 
-const SHOP_ITEMS = [
-  { id: 'wishcoin', name: '许愿币', price: 1, unit: '颗', icon: 'wishcoin' },
-  { id: 'drama', name: '短剧', price: 1, unit: '集', icon: 'drama' },
-  { id: 'movie', name: '看电影', price: 5, unit: '部', icon: 'movie' },
-  { id: 'waterpark', name: '水上乐园', price: 10, unit: '次', icon: 'waterpark' },
-  { id: 'game', name: '蛋仔派对', price: 1, unit: '分钟', icon: 'game' },
-];
+function loadShopItems() {
+  const meta = ensureMeta();
+  if (!meta.shopItems) {
+    meta.shopItems = JSON.parse(JSON.stringify(DEFAULT_SHOP_ITEMS));
+    saveData();
+  }
+  return meta.shopItems;
+}
+
+function saveShopItems(items) {
+  const meta = ensureMeta();
+  meta.shopItems = items;
+  saveData();
+}
+
+function getShopItems() { return loadShopItems(); }
+
+function migrateMeta() {
+  const meta = ensureMeta();
+  if (!meta.version) meta.version = 0;
+  if (meta.version < 3) {
+    meta.settings = JSON.parse(JSON.stringify({
+      title: DEFAULT_TITLE,
+      mapTitle: DEFAULT_MAP_TITLE,
+      subtitle: DEFAULT_SUBTITLE,
+      startDate: DEFAULT_CHALLENGE_START,
+      endDate: DEFAULT_CHALLENGE_END,
+      subjects: JSON.parse(JSON.stringify(DEFAULT_SUBJECTS)),
+      milestones: JSON.parse(JSON.stringify(DEFAULT_MILESTONES)),
+    }));
+    meta.shopItems = JSON.parse(JSON.stringify(DEFAULT_SHOP_ITEMS));
+    meta.version = 3;
+    saveData();
+  }
+}
+
+function getSubjectColor(key) {
+  if (SUBJECT_COLORS[key]) return SUBJECT_COLORS[key];
+  const subjects = getSubjects();
+  const idx = subjects.findIndex(s => s.key === key);
+  if (idx < 0) return '#aaa';
+  if (idx < 3) return SUBJECT_COLORS[['math','chinese','english'][idx]];
+  return EXTRA_SUBJECT_COLORS[(idx - 3) % EXTRA_SUBJECT_COLORS.length];
+}
 
 // 像素风格图标 SVG
 const SHOP_ICONS = {
@@ -1321,12 +1505,22 @@ const SHOP_ICONS = {
   movie: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="8" width="24" height="16" rx="2" fill="#4ecdc4"/><rect x="6" y="10" width="20" height="12" fill="#1a5f5a"/><polygon points="13,13 13,21 21,17" fill="white"/><rect x="25" y="11" width="2" height="10" fill="#f4a742"/></svg>`,
   waterpark: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="2" y="20" width="28" height="8" rx="2" fill="#4fc3f7"/><path d="M4 20 Q8 12 12 20 Q16 12 20 20 Q24 12 28 20" fill="none" stroke="#0288d1" stroke-width="2" stroke-linecap="round"/><circle cx="16" cy="10" r="4" fill="#ffbe0b"/></svg>`,
   game: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="4" y="6" width="24" height="20" rx="4" fill="#a78bfa"/><rect x="7" y="9" width="18" height="14" rx="2" fill="#e9e3ff"/><circle cx="11" cy="15" r="2" fill="#ff6b6b"/><circle cx="21" cy="15" r="2" fill="#4ecdc4"/><rect x="14" y="19" width="4" height="2" fill="#7c3aed"/></svg>`,
+  star: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><polygon points="16,3 19,12 29,12 21,18 24,28 16,22 8,28 11,18 3,12 13,12" fill="#ffbe0b" stroke="#f4a742" stroke-width="2"/></svg>`,
+  crown: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><path d="M4 24 L28 24 L26 12 L20 18 L16 8 L12 18 L6 12 Z" fill="#ffd93d" stroke="#f4a742" stroke-width="2"/><circle cx="16" cy="8" r="2" fill="#ff6b6b"/></svg>`,
+  gift: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="5" y="14" width="22" height="16" rx="2" fill="#ff85a1"/><rect x="14" y="14" width="4" height="16" fill="#f4a742"/><path d="M16 14 Q10 8 16 6 Q22 8 16 14" fill="#ff85a1"/><path d="M16 14 Q22 8 16 6 Q10 8 16 14" fill="#ff85a1"/></svg>`,
+  icecream: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><rect x="10" y="6" width="12" height="16" rx="4" fill="#f4a742"/><polygon points="16,22 22,30 10,30" fill="#deb887"/></svg>`,
+  balloon: `<svg viewBox="0 0 32 32" xmlns="http://www.w3.org/2000/svg"><ellipse cx="16" cy="14" rx="10" ry="12" fill="#60a5fa"/><line x1="16" y1="26" x2="16" y2="32" stroke="#aaa" stroke-width="2"/></svg>`,
 };
 
 // ========== 状态 ==========
 let currentDate = getTodayStr();
 let data = loadData();
 let lastAllDone = false;
+let editTags = [];
+let editingTaskId = null;
+let editingShopId = null;
+let editingSubjectKey = null;
+let subjectEditCallback = null;
 
 function getTodayStr() {
   const d = new Date();
@@ -1336,8 +1530,14 @@ function getTodayStr() {
 function formatDateStr(dateStr) {
   const [y, m, d] = dateStr.split('-');
   const date = new Date(+y, +m - 1, +d);
-  const weekdays = ['日', '一', '二', '三', '四', '五', '六'];
+  const weekdays = ['日','一','二','三','四','五','六'];
   return { full: `${+m}月${+d}日`, weekday: `星期${weekdays[date.getDay()]}`, isToday: dateStr === getTodayStr() };
+}
+
+function formatDateRange() {
+  const start = formatDateStr(getChallengeStart()).full;
+  const end = formatDateStr(getChallengeEnd()).full;
+  return `${start} - ${end}`;
 }
 
 function ensureMeta() {
@@ -1345,7 +1545,7 @@ function ensureMeta() {
     data.__meta = {
       transactions: [],
       milestonesClaimed: [],
-      version: 2
+      version: 3
     };
   }
   return data.__meta;
@@ -1357,11 +1557,11 @@ function loadData() {
     const parsed = raw ? JSON.parse(raw) : {};
     ensureMetaInData(parsed);
     return parsed;
-  } catch { return { __meta: { transactions: [], milestonesClaimed: [], version: 2 } }; }
+  } catch { return { __meta: { transactions: [], milestonesClaimed: [], version: 3 } }; }
 }
 
 function ensureMetaInData(d) {
-  if (!d.__meta) d.__meta = { transactions: [], milestonesClaimed: [], version: 2 };
+  if (!d.__meta) d.__meta = { transactions: [], milestonesClaimed: [], version: 3 };
 }
 
 function saveData() {
@@ -1382,8 +1582,8 @@ function getTaskData(dateStr, taskId) {
 // ========== 星星经济 ==========
 function getDateRange(start, end) {
   const dates = [];
-  let cur = new Date(start);
-  const last = new Date(end);
+  let cur = new Date(start + 'T00:00:00');
+  const last = new Date(end + 'T00:00:00');
   while (cur <= last) {
     dates.push(`${cur.getFullYear()}-${String(cur.getMonth()+1).padStart(2,'0')}-${String(cur.getDate()).padStart(2,'0')}`);
     cur.setDate(cur.getDate() + 1);
@@ -1402,7 +1602,7 @@ function isFullDone(dateStr) {
 }
 
 function getFullDoneDays() {
-  return getDateRange(CHALLENGE_START, CHALLENGE_END).filter(isFullDone).length;
+  return getDateRange(getChallengeStart(), getChallengeEnd()).filter(isFullDone).length;
 }
 
 function addTransaction(type, amount, reason, extra = {}) {
@@ -1419,7 +1619,6 @@ function addTransaction(type, amount, reason, extra = {}) {
 }
 
 function getBaseStars() {
-  // 统计所有历史完成任务数：每完成1个任务 = 1星
   let stars = 0;
   Object.keys(data).forEach(ds => {
     if (ds === '__meta') return;
@@ -1429,22 +1628,26 @@ function getBaseStars() {
 }
 
 function getPerfectScoreBonus() {
-  // 统计所有历史满分记录
   let bonus = 0;
+  const tasks = getTasks();
   Object.keys(data).forEach(ds => {
     if (ds === '__meta') return;
     const day = data[ds];
     if (!day) return;
-    if (day['math-paper'] && day['math-paper'].score === 100) bonus += 5;
-    if (day['chinese-exam'] && day['chinese-exam'].score === 100) bonus += 5;
+    tasks.forEach(t => {
+      if (t.hasScore && t.bonusStars > 0 && day[t.id] && day[t.id].score === 100) {
+        bonus += t.bonusStars;
+      }
+    });
   });
   return bonus;
 }
 
 function getMilestoneBonus() {
   const meta = ensureMeta();
+  const milestones = getMilestones();
   return meta.milestonesClaimed.reduce((sum, key) => {
-    const m = MILESTONES.find(x => x.days === parseInt(key));
+    const m = milestones.find(x => x.days === parseInt(key));
     return sum + (m ? m.reward : 0);
   }, 0);
 }
@@ -1461,9 +1664,9 @@ function getTotalStars() {
 }
 
 function getMilestoneDates() {
-  const start = new Date(CHALLENGE_START);
+  const start = new Date(getChallengeStart() + 'T00:00:00');
   const dates = {};
-  MILESTONES.forEach(m => {
+  getMilestones().forEach(m => {
     const d = new Date(start);
     d.setDate(d.getDate() + m.days - 1);
     const ds = `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
@@ -1476,7 +1679,7 @@ function checkMilestones() {
   const meta = ensureMeta();
   const fullDays = getFullDoneDays();
   let newClaim = false;
-  MILESTONES.forEach(m => {
+  getMilestones().forEach(m => {
     if (fullDays >= m.days && !meta.milestonesClaimed.includes(String(m.days))) {
       meta.milestonesClaimed.push(String(m.days));
       addTransaction('earn', m.reward, `连续点亮 ${m.days} 天奖励`, { milestone: m.days });
@@ -1495,7 +1698,11 @@ function checkPerfectScore(taskId, score) {
   if (score !== 100) return;
   const tasks = getTasks();
   const task = tasks.find(t => t.id === taskId);
-  if (!task || !task.bonusStars || task.bonusStars <= 0) return;
+  if (!task || !task.hasScore || task.bonusStars <= 0) return;
+  const meta = ensureMeta();
+  const today = getTodayStr();
+  const alreadyEarned = meta.transactions.some(tx => tx.type === 'earn' && tx.taskId === taskId && tx.date === today && tx.reason.includes('满分'));
+  if (alreadyEarned) return;
   addTransaction('earn', task.bonusStars, `${task.name}满分奖励`, { taskId });
   saveData();
   showCelebration('⭐', `${task.name}满分！`, `额外获得${task.bonusStars}颗星星！`);
@@ -1566,6 +1773,7 @@ function handleImport(input) {
       if (typeof imported === 'object') {
         data = imported;
         ensureMetaInData(data);
+        migrateMeta();
         saveData();
         renderAll();
         showCelebration('💾', '恢复成功', '学习记录已经恢复啦！');
@@ -1582,56 +1790,23 @@ function redeem(itemId) {
   const qty = parseInt(qtyInput.value) || 0;
   if (qty <= 0) return;
 
-  const item = SHOP_ITEMS.find(i => i.id === itemId);
+  const items = getShopItems();
+  const item = items.find(i => i.id === itemId);
+  if (!item) return;
   const cost = item.price * qty;
   if (cost > getTotalStars()) {
     alert('星星不够啦，继续加油完成任务吧！');
     return;
   }
 
-  addTransaction('redeem', cost, `兑换 ${item.name} x${qty}`, { itemId, qty });
+  addTransaction('redeem', cost, `兑换 ${item.name} x${qty}`, { itemId, qty, unitPrice: item.price, unit: item.unit });
   saveData();
   renderAll();
-  qtyInput.value = 1;
+  qtyInput.value = item.qty || 1;
   showCelebration('🎁', '兑换成功！', `用 ${cost} 颗星星兑换了 ${item.name} x${qty}`);
   playSuccessSound();
   spawnCoinBurst();
 }
-
-function redeemCustom() {
-  const name = document.getElementById('custom-name').value.trim();
-  const qty = parseInt(document.getElementById('custom-qty').value) || 0;
-  const price = parseInt(document.getElementById('custom-price').value) || 0;
-  const unit = document.getElementById('custom-unit').value.trim() || '个';
-  if (!name || qty <= 0 || price <= 0) {
-    alert('请填写完整的奖励信息');
-    return;
-  }
-  const cost = price * qty;
-  if (cost > getTotalStars()) {
-    alert('星星不够啦，继续加油完成任务吧！');
-    return;
-  }
-
-  addTransaction('redeem', cost, `兑换 ${name} x${qty}`, { customName: name, qty, unitPrice: price, unit });
-  saveData();
-  renderAll();
-  document.getElementById('custom-name').value = '自定义奖励';
-  document.getElementById('custom-qty').value = '1';
-  document.getElementById('custom-price').value = '1';
-  document.getElementById('custom-unit').value = '个';
-  showCelebration('🎁', '兑换成功！', `用 ${cost} 颗星星兑换了 ${name} x${qty}`);
-  playSuccessSound();
-  spawnCoinBurst();
-}
-
-// 自定义单位同步
-document.addEventListener('input', e => {
-  if (e.target && e.target.id === 'custom-unit') {
-    const label = document.getElementById('custom-unit-label');
-    if (label) label.textContent = e.target.value || '个';
-  }
-});
 
 function spawnCoinBurst() {
   const container = document.createElement('div');
@@ -1693,41 +1868,34 @@ function renderModalBody() {
 
 function renderShopTab() {
   const balance = getTotalStars();
+  const items = getShopItems();
   let html = '<div class="shop-grid">';
 
-  SHOP_ITEMS.forEach(item => {
-    const iconSvg = SHOP_ICONS[item.icon] || '';
+  items.forEach(item => {
+    const iconSvg = SHOP_ICONS[item.icon] || SHOP_ICONS.star;
     const canAfford = item.price <= balance;
     html += `
-      <div class="shop-item">
+      <div class="shop-item" data-shop-id="${item.id}"
+           onpointerdown="handleShopPointerDown(event, '${item.id}')"
+           onpointerup="handleShopPointerUp()"
+           onpointerleave="handleShopPointerLeave()">
         <div class="shop-item-icon">${iconSvg}</div>
-        <div class="shop-item-name">${item.name}</div>
-        <div class="shop-item-price">${item.price} 星/${item.unit}</div>
+        <div class="shop-item-name">${escapeHtml(item.name)}</div>
+        <div class="shop-item-price">${item.price} 星/${escapeHtml(item.unit)}</div>
         <div class="shop-item-input">
-          <input type="number" id="qty-${item.id}" value="1" min="1" onkeydown="event.stopPropagation()" onclick="event.stopPropagation()">
-          <span>${item.unit}</span>
+          <input type="number" id="qty-${item.id}" value="${item.qty || 1}" min="1" onkeydown="event.stopPropagation()" onclick="event.stopPropagation()">
+          <span>${escapeHtml(item.unit)}</span>
         </div>
         <button onclick="redeem('${item.id}')" ${!canAfford ? 'disabled' : ''}>${canAfford ? '兑换' : '星星不足'}</button>
+        <div class="shop-item-hint">长按编辑商品</div>
       </div>
     `;
   });
 
   html += `
-    <div class="shop-item custom">
-      <div class="custom-icon">🎁</div>
-      <div class="custom-row">
-        <input type="text" id="custom-name" class="name" value="自定义奖励" onkeydown="event.stopPropagation()" onclick="event.stopPropagation()">
-        <div class="custom-price-row">
-          <input type="number" id="custom-price" value="1" min="1" onkeydown="event.stopPropagation()" onclick="event.stopPropagation()">
-          <span>星 /</span>
-          <input type="text" id="custom-unit" class="unit" value="个" onkeydown="event.stopPropagation()" onclick="event.stopPropagation()">
-        </div>
-        <div class="shop-item-input">
-          <input type="number" id="custom-qty" value="1" min="1" onkeydown="event.stopPropagation()" onclick="event.stopPropagation()">
-          <span id="custom-unit-label">个</span>
-        </div>
-      </div>
-      <button onclick="redeemCustom()">兑换</button>
+    <div class="shop-item add-item" onclick="openShopEditor()">
+      <div class="shop-item-icon">+</div>
+      <div class="shop-item-name">新增商品</div>
     </div>
   </div>`;
 
@@ -1739,13 +1907,14 @@ function renderRedeemTab() {
   const redeems = meta.transactions.filter(tx => tx.type === 'redeem');
   if (redeems.length === 0) return '<div class="empty-tip">还没有兑换记录哦~</div>';
 
+  const items = getShopItems();
   let html = '<div class="record-list">';
   redeems.forEach(tx => {
-    const title = tx.customName || (SHOP_ITEMS.find(i => i.id === tx.itemId)?.name || '奖励');
+    const title = tx.customName || (items.find(i => i.id === tx.itemId)?.name || '奖励');
     html += `
       <div class="record-item">
         <div class="record-info">
-          <div class="record-title">${title} × ${tx.qty || 1}</div>
+          <div class="record-title">${escapeHtml(title)} × ${tx.qty || 1}</div>
           <div class="record-date">${tx.date}</div>
         </div>
         <div class="record-amount spend">-${tx.amount}★</div>
@@ -1765,7 +1934,7 @@ function renderEarnTab() {
     html += `
       <div class="record-item">
         <div class="record-info">
-          <div class="record-title">${tx.reason}</div>
+          <div class="record-title">${escapeHtml(tx.reason)}</div>
           <div class="record-date">${tx.date}</div>
         </div>
         <div class="record-amount earn">+${tx.amount}★</div>
@@ -1773,6 +1942,11 @@ function renderEarnTab() {
     `;
   });
   return html + '</div>';
+}
+
+function escapeHtml(text) {
+  if (text === undefined || text === null) return '';
+  return String(text).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 }
 
 // ========== 庆祝与音效 ==========
@@ -1847,6 +2021,7 @@ function spawnStars() {
 
 // ========== 渲染 ==========
 function renderAll() {
+  renderHeader();
   renderStats();
   renderDateNav();
   renderTasks();
@@ -1854,6 +2029,12 @@ function renderAll() {
   if (document.getElementById('rewardModal').classList.contains('show')) {
     renderModalBody();
   }
+}
+
+function renderHeader() {
+  const settings = getSettings();
+  document.getElementById('headerTitle').textContent = settings.title || DEFAULT_TITLE;
+  document.getElementById('headerSubtitle').textContent = settings.subtitle || DEFAULT_SUBTITLE;
 }
 
 function renderStats() {
@@ -1890,25 +2071,31 @@ function renderDateNav() {
 function renderTasks() {
   const day = getDayData(currentDate);
   let html = '';
+  const subjects = getSubjects();
 
-  SUBJECTS.forEach(subj => {
+  subjects.forEach(subj => {
     const tasks = getTasks();
     const subjTasks = tasks.filter(t => t.subject === subj.key);
     const subjDone = subjTasks.filter(t => day[t.id] && day[t.id].done).length;
+    const color = getSubjectColor(subj.key);
 
     html += `
       <div class="subject-section">
-        <div class="subject-header">
-          <div class="subject-icon ${subj.cls}">${subj.icon}</div>
-          <div class="subject-name">${subj.name}</div>
+        <div class="subject-header"
+             onpointerdown="handleSubjectPointerDown(event, '${subj.key}')"
+             onpointerup="handleSubjectPointerUp()"
+             onpointerleave="handleSubjectPointerLeave()">
+          <div class="subject-icon" style="background:${color}">${subj.icon}</div>
+          <div class="subject-name">${escapeHtml(subj.name)}</div>
           <div class="subject-progress">${subjDone}/${subjTasks.length} 完成</div>
+          <span class="subject-hint">长按编辑</span>
         </div>
     `;
 
     subjTasks.forEach(task => {
       const td = getTaskData(currentDate, task.id);
       const isDone = td.done;
-      const isPerfect = task.bonusStars > 0 && td.score === 100;
+      const isPerfect = task.hasScore && task.bonusStars > 0 && td.score === 100;
       html += `
         <div class="task-card ${isDone ? 'completed' : ''}"
              onclick="handleCardClick(event, '${task.id}')"
@@ -1919,10 +2106,10 @@ function renderTasks() {
           <div class="task-top">
             <div class="task-emoji">${task.emoji}</div>
             <div class="task-info">
-              <div class="task-name">${task.name}</div>
-              <div class="task-detail">${task.detail}</div>
+              <div class="task-name">${escapeHtml(task.name)}</div>
+              <div class="task-detail">${escapeHtml(task.detail)}</div>
               <div class="task-tags">
-                ${task.tags.map(tag => `<span class="tag ${tag.cls}">${tag.text}</span>`).join('')}
+                ${task.tags.map(tag => `<span class="tag ${tag.cls}">${escapeHtml(tag.text)}</span>`).join('')}
                 ${isDone ? '<span class="tag done">已完成</span>' : ''}
                 ${isPerfect ? `<span class="tag bonus">满分+${task.bonusStars}星</span>` : ''}
               </div>
@@ -1930,7 +2117,7 @@ function renderTasks() {
             <div class="task-check">${isDone ? '★' : '☆'}</div>
           </div>
           ${task.hasScore ? renderScoreArea(task, td) : ''}
-          <div class="task-actions-hint">长按编辑</div>
+          <div class="task-actions-hint">长按编辑任务</div>
         </div>
       `;
     });
@@ -1944,13 +2131,13 @@ function renderTasks() {
 
 function renderScoreArea(task, td) {
   if (!td.done) {
-    return `<div class="score-area" onclick="event.stopPropagation()"><div class="score-hint">完成任务后可记录 ${task.scoreLabel}</div></div>`;
+    return `<div class="score-area" onclick="event.stopPropagation()"><div class="score-hint">完成任务后可记录 ${escapeHtml(task.scoreLabel)}</div></div>`;
   }
   const score = td.score;
   return `
     <div class="score-area" onclick="event.stopPropagation()">
       <div class="score-row">
-        <label>${task.scoreLabel}</label>
+        <label>${escapeHtml(task.scoreLabel)}</label>
         <input type="number" class="score-input" min="0" max="100"
                value="${score !== null ? score : ''}" placeholder="0-100"
                onchange="setScore('${task.id}', clampScore(parseInt(this.value) || 0))"
@@ -1969,8 +2156,13 @@ function renderScoreArea(task, td) {
 }
 
 function renderOverview() {
+  const settings = getSettings();
   const fullDays = getFullDoneDays();
-  const maxDays = MILESTONES[MILESTONES.length - 1].days;
+  const milestones = getMilestones();
+  const maxDays = milestones.length > 0 ? milestones[milestones.length - 1].days : 15;
+
+  document.getElementById('mapTitleText').textContent = settings.mapTitle || DEFAULT_MAP_TITLE;
+  document.getElementById('mapSubtitle').textContent = `${formatDateRange()} · 完成全部${getTasks().length}项点亮一天`;
 
   // 里程碑进度条
   let milestoneHtml = `
@@ -1984,7 +2176,7 @@ function renderOverview() {
     <div class="milestone-nodes">
   `;
 
-  MILESTONES.forEach(m => {
+  milestones.forEach(m => {
     const reached = fullDays >= m.days;
     const claimed = data.__meta.milestonesClaimed.includes(String(m.days));
     milestoneHtml += `
@@ -1999,11 +2191,11 @@ function renderOverview() {
   document.getElementById('milestoneBar').innerHTML = milestoneHtml;
 
   // 日历网格
-  const dates = getDateRange(CHALLENGE_START, CHALLENGE_END);
+  const dates = getDateRange(getChallengeStart(), getChallengeEnd());
   const today = getTodayStr();
   let gridHtml = '';
-
   const milestoneDates = getMilestoneDates();
+  const total = getTasks().length;
 
   dates.forEach(ds => {
     const count = getCompletedCount(ds);
@@ -2011,12 +2203,12 @@ function renderOverview() {
     const isToday = ds === today;
     const isFuture = ds > today;
     const milestoneDay = milestoneDates[ds];
-    const cls = count === 8 ? 'done-8' : count >= 6 ? 'done-6' : count >= 4 ? 'done-4' : count >= 2 ? 'done-2' : count > 0 ? 'done-1' : 'done-0';
-    const mark = count === 8 ? '8/8' : count > 0 ? `${count}/8` : '';
+    const cls = count === total ? 'done-8' : count >= total * 0.75 ? 'done-6' : count >= total * 0.5 ? 'done-4' : count > 0 ? 'done-2' : 'done-0';
+    const mark = count === total ? `${total}/${total}` : count > 0 ? `${count}/${total}` : '';
 
     gridHtml += `
       <div class="calendar-day ${cls} ${isToday ? 'today' : ''} ${isFuture ? 'future' : ''} ${milestoneDay ? 'milestone' : ''}"
-           onclick="jumpToDate('${ds}')" title="${fmt.full} 完成 ${count}/8${milestoneDay ? ' · 第'+milestoneDay+'天里程碑' : ''}">
+           onclick="jumpToDate('${ds}')" title="${fmt.full} 完成 ${count}/${total}${milestoneDay ? ' · 第'+milestoneDay+'天里程碑' : ''}">
         <span class="day-num">${+ds.split('-')[2]}</span>
         ${mark ? `<span class="day-mark">${mark}</span>` : ''}
         ${milestoneDay ? '<span class="milestone-star">★</span>' : ''}
@@ -2039,6 +2231,18 @@ function clampScore(n) { return Math.min(100, Math.max(0, n)); }
 let longPressTimer = null;
 let longPressTriggered = false;
 
+function startLongPress(callback) {
+  longPressTriggered = false;
+  longPressTimer = setTimeout(() => {
+    longPressTriggered = true;
+    callback();
+  }, 600);
+}
+
+function endLongPress() {
+  clearTimeout(longPressTimer);
+}
+
 function handleCardClick(event, taskId) {
   if (longPressTriggered) { longPressTriggered = false; return; }
   if (event.target.closest('.score-area')) return;
@@ -2046,24 +2250,39 @@ function handleCardClick(event, taskId) {
 }
 
 function handleCardPointerDown(event, taskId) {
-  longPressTriggered = false;
-  longPressTimer = setTimeout(() => {
-    longPressTriggered = true;
-    openTaskEditor(taskId);
-  }, 600);
+  if (event.target.closest('.score-area')) return;
+  startLongPress(() => openTaskEditor(taskId));
 }
 
-function handleCardPointerUp() {
-  clearTimeout(longPressTimer);
-}
+function handleCardPointerUp() { endLongPress(); }
+function handleCardPointerLeave() { endLongPress(); }
 
-function handleCardPointerLeave() {
-  clearTimeout(longPressTimer);
+function handleTitlePointerDown(event) {
+  startLongPress(() => openTitleEditor());
 }
+function handleTitlePointerUp() { endLongPress(); }
+function handleTitlePointerLeave() { endLongPress(); }
+
+function handleSubjectPointerDown(event, key) {
+  startLongPress(() => openSubjectEditor(key));
+}
+function handleSubjectPointerUp() { endLongPress(); }
+function handleSubjectPointerLeave() { endLongPress(); }
+
+function handleMapPointerDown(event) {
+  startLongPress(() => openMapEditor());
+}
+function handleMapPointerUp() { endLongPress(); }
+function handleMapPointerLeave() { endLongPress(); }
+
+function handleShopPointerDown(event, itemId) {
+  if (event.target.closest('input, button')) return;
+  startLongPress(() => openShopEditor(itemId));
+}
+function handleShopPointerUp() { endLongPress(); }
+function handleShopPointerLeave() { endLongPress(); }
 
 // ========== 任务编辑弹窗 ==========
-let editingTaskId = null;
-
 function openTaskEditor(taskId) {
   editingTaskId = taskId;
   const tasks = getTasks();
@@ -2073,27 +2292,22 @@ function openTaskEditor(taskId) {
   document.getElementById('taskEditorTitle').textContent = isNew ? '新增任务' : '编辑任务';
   document.getElementById('editTaskName').value = task ? task.name : '';
   document.getElementById('editTaskDetail').value = task ? task.detail : '';
-  document.getElementById('editTaskSubject').value = task ? task.subject : 'math';
-  document.getElementById('editHasScore').checked = task ? task.hasScore : false;
+  document.getElementById('editTaskSubject').innerHTML = renderSubjectOptions(task ? task.subject : getSubjects()[0]?.key || 'math');
   document.getElementById('editScoreLabel').value = task ? (task.scoreLabel || '') : '';
-  document.getElementById('editScoreLabel').style.display = (task && task.hasScore) ? 'block' : 'none';
   document.getElementById('editBonus').value = task ? (task.bonusStars || 5) : 5;
 
-  // 标签
   editTags = task ? JSON.parse(JSON.stringify(task.tags || [])) : [];
   renderTagPreview();
   document.getElementById('editTagText').value = '';
   document.getElementById('editTagCls').value = 'daily';
 
-  // 图标选择器
   let iconHtml = '';
   const currentEmoji = task ? task.emoji : '📐';
   ICON_OPTIONS.forEach(icon => {
-    iconHtml += `<div class="icon-opt ${icon === currentEmoji ? 'selected' : ''}" onclick="selectIcon('${icon}')">${icon}</div>`;
+    iconHtml += `<div class="icon-opt ${icon === currentEmoji ? 'selected' : ''}" onclick="selectTaskIcon('${icon}')">${icon}</div>`;
   });
   document.getElementById('iconPicker').innerHTML = iconHtml;
 
-  // 操作按钮
   let actionsHtml = `<button class="save" onclick="saveTask()">${isNew ? '添加任务' : '保存修改'}</button>`;
   if (!isNew) {
     actionsHtml += '<button class="delete" onclick="deleteTask()">删除任务</button>';
@@ -2112,7 +2326,24 @@ function closeTaskEditor(e) {
   editTags = [];
 }
 
-let editTags = [];
+function renderSubjectOptions(selectedKey) {
+  const subjects = getSubjects();
+  let html = '';
+  subjects.forEach(subj => {
+    html += `<option value="${subj.key}" ${subj.key === selectedKey ? 'selected' : ''}>${escapeHtml(subj.name)}</option>`;
+  });
+  html += `<option value="__new__">+ 添加新学科</option>`;
+  return html;
+}
+
+function handleTaskSubjectChange(select) {
+  if (select.value === '__new__') {
+    openSubjectEditor(null, () => {
+      const currentVal = document.getElementById('editTaskSubject').value;
+      document.getElementById('editTaskSubject').innerHTML = renderSubjectOptions(currentVal === '__new__' ? (getSubjects()[0]?.key || 'math') : currentVal);
+    });
+  }
+}
 
 function addTagToEdit() {
   const text = document.getElementById('editTagText').value.trim();
@@ -2130,17 +2361,17 @@ function removeTagFromEdit(index) {
 
 function renderTagPreview() {
   document.getElementById('tagPreview').innerHTML = editTags.map((t, i) =>
-    `<span class="tag ${t.cls}">${t.text}<span class="tag-remove" onclick="removeTagFromEdit(${i})">×</span></span>`
+    `<span class="tag ${t.cls}">${escapeHtml(t.text)}<span class="tag-remove" onclick="removeTagFromEdit(${i})">×</span></span>`
   ).join('');
 }
 
-function selectIcon(icon) {
-  document.querySelectorAll('.icon-picker .icon-opt').forEach(el => el.classList.remove('selected'));
+function selectTaskIcon(icon) {
+  document.querySelectorAll('#iconPicker .icon-opt').forEach(el => el.classList.remove('selected'));
   event.target.classList.add('selected');
 }
 
-function getSelectedIcon() {
-  const sel = document.querySelector('.icon-picker .icon-opt.selected');
+function getSelectedTaskIcon() {
+  const sel = document.querySelector('#iconPicker .icon-opt.selected');
   return sel ? sel.textContent : '📐';
 }
 
@@ -2148,16 +2379,18 @@ function saveTask() {
   const name = document.getElementById('editTaskName').value.trim();
   if (!name) { alert('请输入任务名称'); return; }
   const tasks = getTasks();
+  const scoreLabel = document.getElementById('editScoreLabel').value.trim();
+  const bonusStars = parseInt(document.getElementById('editBonus').value) || 0;
   const taskData = {
     id: editingTaskId || ('custom-' + Date.now()),
     subject: document.getElementById('editTaskSubject').value,
-    emoji: getSelectedIcon(),
+    emoji: getSelectedTaskIcon(),
     name,
     detail: document.getElementById('editTaskDetail').value.trim(),
     tags: editTags,
-    hasScore: document.getElementById('editHasScore').checked,
-    scoreLabel: document.getElementById('editHasScore').checked ? (document.getElementById('editScoreLabel').value.trim() || '得分') : '',
-    bonusStars: parseInt(document.getElementById('editBonus').value) || 0,
+    hasScore: !!scoreLabel,
+    scoreLabel: scoreLabel || '',
+    bonusStars: !!scoreLabel ? bonusStars : 0,
   };
 
   if (editingTaskId) {
@@ -2189,16 +2422,315 @@ function renderAddTaskButton(subjectKey) {
   </div>`;
 }
 
+// ========== 商品编辑弹窗 ==========
+function openShopEditor(itemId) {
+  editingShopId = itemId;
+  const items = getShopItems();
+  const item = itemId ? items.find(i => i.id === itemId) : null;
+  const isNew = !item;
+
+  document.getElementById('shopEditorTitle').textContent = isNew ? '新增商品' : '编辑商品';
+  document.getElementById('editShopName').value = item ? item.name : '';
+  document.getElementById('editShopPrice').value = item ? item.price : 1;
+  document.getElementById('editShopUnit').value = item ? item.unit : '个';
+  document.getElementById('editShopQty').value = item ? (item.qty || 1) : 1;
+
+  const currentIcon = item ? item.icon : SHOP_ICON_KEYS[0];
+  let iconHtml = '';
+  SHOP_ICON_KEYS.forEach(key => {
+    const svg = SHOP_ICONS[key] || SHOP_ICONS.star;
+    iconHtml += `<div class="icon-opt ${key === currentIcon ? 'selected' : ''}" onclick="selectShopIcon('${key}')" title="${key}">${svg}</div>`;
+  });
+  document.getElementById('shopIconPicker').innerHTML = iconHtml;
+
+  let actionsHtml = `<button class="save" onclick="saveShop()">${isNew ? '添加商品' : '保存修改'}</button>`;
+  if (!isNew) {
+    actionsHtml += '<button class="delete" onclick="deleteShop()">删除商品</button>';
+  }
+  document.getElementById('shopEditorActions').innerHTML = actionsHtml;
+
+  document.getElementById('shopEditorOverlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeShopEditor(e) {
+  if (e && e.target !== document.getElementById('shopEditorOverlay')) return;
+  document.getElementById('shopEditorOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+  editingShopId = null;
+}
+
+function selectShopIcon(key) {
+  document.querySelectorAll('#shopIconPicker .icon-opt').forEach(el => el.classList.remove('selected'));
+  event.currentTarget.classList.add('selected');
+}
+
+function getSelectedShopIcon() {
+  const sel = document.querySelector('#shopIconPicker .icon-opt.selected');
+  return sel ? sel.getAttribute('title') : SHOP_ICON_KEYS[0];
+}
+
+function saveShop() {
+  const name = document.getElementById('editShopName').value.trim();
+  if (!name) { alert('请输入商品名称'); return; }
+  const price = parseInt(document.getElementById('editShopPrice').value) || 1;
+  const unit = document.getElementById('editShopUnit').value.trim() || '个';
+  const qty = parseInt(document.getElementById('editShopQty').value) || 1;
+  if (price <= 0 || qty <= 0) { alert('价格和数量必须大于0'); return; }
+
+  const items = getShopItems();
+  const itemData = {
+    id: editingShopId || ('shop-' + Date.now()),
+    name,
+    price,
+    unit,
+    qty,
+    icon: getSelectedShopIcon(),
+  };
+
+  if (editingShopId) {
+    const idx = items.findIndex(i => i.id === editingShopId);
+    if (idx >= 0) items[idx] = itemData;
+  } else {
+    items.push(itemData);
+  }
+
+  saveShopItems(items);
+  closeShopEditor();
+  renderAll();
+}
+
+function deleteShop() {
+  if (!confirm('确定要删除这个商品吗？')) return;
+  let items = getShopItems();
+  items = items.filter(i => i.id !== editingShopId);
+  saveShopItems(items);
+  closeShopEditor();
+  renderAll();
+}
+
+// ========== 学科编辑弹窗 ==========
+function openSubjectEditor(key, callback) {
+  editingSubjectKey = key;
+  subjectEditCallback = callback || null;
+  const subjects = getSubjects();
+  const subject = key ? subjects.find(s => s.key === key) : null;
+  const isNew = !subject;
+
+  document.getElementById('subjectEditorTitle').textContent = isNew ? '新增学科' : '编辑学科';
+  document.getElementById('editSubjectName').value = subject ? subject.name : '';
+
+  const currentIcon = subject ? subject.icon : SUBJECT_ICON_OPTIONS[0];
+  let iconHtml = '';
+  SUBJECT_ICON_OPTIONS.forEach(icon => {
+    iconHtml += `<div class="icon-opt ${icon === currentIcon ? 'selected' : ''}" onclick="selectSubjectIcon('${icon}')">${icon}</div>`;
+  });
+  document.getElementById('subjectIconPicker').innerHTML = iconHtml;
+
+  let actionsHtml = `<button class="save" onclick="saveSubject()">${isNew ? '添加学科' : '保存修改'}</button>`;
+  if (!isNew && subjects.length > 1) {
+    actionsHtml += '<button class="delete" onclick="deleteSubject()">删除学科</button>';
+  }
+  document.getElementById('subjectEditorActions').innerHTML = actionsHtml;
+
+  document.getElementById('subjectEditorOverlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeSubjectEditor(e) {
+  if (e && e.target !== document.getElementById('subjectEditorOverlay')) return;
+  document.getElementById('subjectEditorOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+  editingSubjectKey = null;
+  if (!subjectEditCallback) renderAll();
+}
+
+function selectSubjectIcon(icon) {
+  document.querySelectorAll('#subjectIconPicker .icon-opt').forEach(el => el.classList.remove('selected'));
+  event.target.classList.add('selected');
+}
+
+function getSelectedSubjectIcon() {
+  const sel = document.querySelector('#subjectIconPicker .icon-opt.selected');
+  return sel ? sel.textContent : SUBJECT_ICON_OPTIONS[0];
+}
+
+function saveSubject() {
+  const name = document.getElementById('editSubjectName').value.trim();
+  if (!name) { alert('请输入学科名称'); return; }
+  const subjects = getSubjects();
+  const icon = getSelectedSubjectIcon();
+
+  if (editingSubjectKey) {
+    const idx = subjects.findIndex(s => s.key === editingSubjectKey);
+    if (idx >= 0) {
+      subjects[idx] = { ...subjects[idx], name, icon };
+    }
+  } else {
+    const newKey = 'subj-' + Date.now();
+    subjects.push({ key: newKey, name, icon, cls: newKey });
+  }
+
+  saveSubjects(subjects);
+  closeSubjectEditor();
+  if (subjectEditCallback) {
+    const cb = subjectEditCallback;
+    subjectEditCallback = null;
+    cb();
+  }
+  renderAll();
+}
+
+function deleteSubject() {
+  const subjects = getSubjects();
+  if (subjects.length <= 1) { alert('至少保留一个学科'); return; }
+  if (!confirm('删除学科后，该学科下的任务也会被删除，确定吗？')) return;
+  let tasks = getTasks();
+  tasks = tasks.filter(t => t.subject !== editingSubjectKey);
+  saveTasks(tasks);
+  saveSubjects(subjects.filter(s => s.key !== editingSubjectKey));
+  closeSubjectEditor();
+  renderAll();
+}
+
+// ========== 地图编辑弹窗 ==========
+function openMapEditor() {
+  const settings = getSettings();
+  document.getElementById('editMapTitle').value = settings.mapTitle || DEFAULT_MAP_TITLE;
+  document.getElementById('editMapStart').value = settings.startDate || DEFAULT_CHALLENGE_START;
+  document.getElementById('editMapEnd').value = settings.endDate || DEFAULT_CHALLENGE_END;
+  renderMilestoneEditorList();
+
+  document.getElementById('mapEditorActions').innerHTML = `<button class="save" onclick="saveMap()">保存地图</button>`;
+
+  document.getElementById('mapEditorOverlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMapEditor(e) {
+  if (e && e.target !== document.getElementById('mapEditorOverlay')) return;
+  document.getElementById('mapEditorOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function renderMilestoneEditorList() {
+  const milestones = getMilestones();
+  let html = '';
+  milestones.forEach((m, i) => {
+    html += `
+      <div class="milestone-row" data-index="${i}">
+        <span>第</span>
+        <input type="number" class="m-days" value="${m.days}" min="1" placeholder="天数">
+        <span>天</span>
+        <input type="number" class="m-reward" value="${m.reward}" min="0" placeholder="星星">
+        <span>星</span>
+        <button onclick="removeMilestoneRow(this)">删除</button>
+      </div>
+    `;
+  });
+  document.getElementById('milestoneEditorList').innerHTML = html;
+}
+
+function addMilestoneRow() {
+  const container = document.getElementById('milestoneEditorList');
+  const idx = container.querySelectorAll('.milestone-row').length;
+  const div = document.createElement('div');
+  div.className = 'milestone-row';
+  div.setAttribute('data-index', idx);
+  div.innerHTML = `
+    <span>第</span>
+    <input type="number" class="m-days" value="" min="1" placeholder="天数">
+    <span>天</span>
+    <input type="number" class="m-reward" value="" min="0" placeholder="星星">
+    <span>星</span>
+    <button onclick="removeMilestoneRow(this)">删除</button>
+  `;
+  container.appendChild(div);
+}
+
+function removeMilestoneRow(btn) {
+  btn.closest('.milestone-row').remove();
+}
+
+function isWithinThreeMonths(start, end) {
+  const s = new Date(start + 'T00:00:00');
+  const e = new Date(end + 'T00:00:00');
+  s.setMonth(s.getMonth() + 3);
+  return e <= s;
+}
+
+function saveMap() {
+  const title = document.getElementById('editMapTitle').value.trim();
+  const start = document.getElementById('editMapStart').value;
+  const end = document.getElementById('editMapEnd').value;
+  if (!title || !start || !end) { alert('请填写完整'); return; }
+  if (new Date(start) > new Date(end)) { alert('结束日期不能早于起始日期'); return; }
+  if (!isWithinThreeMonths(start, end)) { alert('日期范围最长不超过3个自然月'); return; }
+
+  const settings = getSettings();
+  settings.mapTitle = title;
+  settings.startDate = start;
+  settings.endDate = end;
+
+  const milestones = [];
+  document.querySelectorAll('#milestoneEditorList .milestone-row').forEach(row => {
+    const days = parseInt(row.querySelector('.m-days').value) || 0;
+    const reward = parseInt(row.querySelector('.m-reward').value) || 0;
+    if (days > 0 && reward >= 0) milestones.push({ days, reward });
+  });
+  milestones.sort((a, b) => a.days - b.days);
+  settings.milestones = milestones;
+
+  // 清理已不存在的里程碑奖励记录，避免显示问题
+  const validDays = new Set(milestones.map(m => String(m.days)));
+  data.__meta.milestonesClaimed = data.__meta.milestonesClaimed.filter(key => validDays.has(key));
+
+  saveSettings(settings);
+  closeMapEditor();
+  renderAll();
+}
+
+// ========== 标题编辑弹窗 ==========
+function openTitleEditor() {
+  const settings = getSettings();
+  document.getElementById('editTitle').value = settings.title || DEFAULT_TITLE;
+  document.getElementById('titleEditorOverlay').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeTitleEditor(e) {
+  if (e && e.target !== document.getElementById('titleEditorOverlay')) return;
+  document.getElementById('titleEditorOverlay').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+function saveTitle() {
+  const title = document.getElementById('editTitle').value.trim();
+  if (!title) { alert('标题不能为空'); return; }
+  if (title.length > 10) { alert('标题不超过10个字'); return; }
+  const settings = getSettings();
+  settings.title = title;
+  saveSettings(settings);
+  closeTitleEditor();
+  renderAll();
+}
+
 // 键盘支持
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') {
     closeCelebration();
     closeModal();
     closeTaskEditor();
+    closeShopEditor();
+    closeSubjectEditor();
+    closeMapEditor();
+    closeTitleEditor();
   }
 });
 
 // ========== 初始化 ==========
+ensureMeta();
+migrateMeta();
 renderAll();
 
 // 每分钟检查跨天
