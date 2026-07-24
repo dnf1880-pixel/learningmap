@@ -301,6 +301,8 @@
     font-size: 24px;
     color: #e0d8d0;
     cursor: pointer;
+    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Segoe UI Symbol', sans-serif;
+    line-height: 1;
   }
   .task-card.completed .task-check {
     color: var(--star);
@@ -313,6 +315,8 @@
     flex-shrink: 0;
     width: 36px;
     text-align: center;
+    font-family: 'Apple Color Emoji', 'Segoe UI Emoji', 'Noto Color Emoji', 'Segoe UI Symbol', sans-serif;
+    line-height: 1;
   }
   .task-info { flex: 1; min-width: 0; }
   .task-name {
@@ -1419,18 +1423,31 @@ function saveTasks(tasks) {
 
 function getTasks() { return loadTasks(); }
 
+function getDynamicDefaultSettings() {
+  const today = getTodayStr();
+  const currentYear = new Date().getFullYear();
+  let start = `${currentYear}-07-24`;
+  let end = `${currentYear}-08-15`;
+  if (today > end) {
+    const nextYear = currentYear + 1;
+    start = `${nextYear}-07-24`;
+    end = `${nextYear}-08-15`;
+  }
+  return {
+    title: DEFAULT_TITLE,
+    mapTitle: DEFAULT_MAP_TITLE,
+    subtitle: DEFAULT_SUBTITLE,
+    startDate: start,
+    endDate: end,
+    subjects: JSON.parse(JSON.stringify(DEFAULT_SUBJECTS)),
+    milestones: JSON.parse(JSON.stringify(DEFAULT_MILESTONES)),
+  };
+}
+
 function getSettings() {
   const meta = ensureMeta();
   if (!meta.settings) {
-    meta.settings = JSON.parse(JSON.stringify({
-      title: DEFAULT_TITLE,
-      mapTitle: DEFAULT_MAP_TITLE,
-      subtitle: DEFAULT_SUBTITLE,
-      startDate: DEFAULT_CHALLENGE_START,
-      endDate: DEFAULT_CHALLENGE_END,
-      subjects: DEFAULT_SUBJECTS,
-      milestones: DEFAULT_MILESTONES,
-    }));
+    meta.settings = JSON.parse(JSON.stringify(getDynamicDefaultSettings()));
     saveData();
   }
   return meta.settings;
@@ -1450,8 +1467,8 @@ function saveSubjects(subjects) {
 }
 
 function getMilestones() { return getSettings().milestones || []; }
-function getChallengeStart() { return getSettings().startDate || DEFAULT_CHALLENGE_START; }
-function getChallengeEnd() { return getSettings().endDate || DEFAULT_CHALLENGE_END; }
+function getChallengeStart() { return getSettings().startDate || getDynamicDefaultSettings().startDate; }
+function getChallengeEnd() { return getSettings().endDate || getDynamicDefaultSettings().endDate; }
 
 function loadShopItems() {
   const meta = ensureMeta();
@@ -1474,15 +1491,20 @@ function migrateMeta() {
   const meta = ensureMeta();
   if (!meta.version) meta.version = 0;
   if (meta.version < 3) {
-    meta.settings = JSON.parse(JSON.stringify({
-      title: DEFAULT_TITLE,
-      mapTitle: DEFAULT_MAP_TITLE,
-      subtitle: DEFAULT_SUBTITLE,
-      startDate: DEFAULT_CHALLENGE_START,
-      endDate: DEFAULT_CHALLENGE_END,
-      subjects: JSON.parse(JSON.stringify(DEFAULT_SUBJECTS)),
-      milestones: JSON.parse(JSON.stringify(DEFAULT_MILESTONES)),
-    }));
+    // 老用户保留原有 2025 默认（避免覆盖历史打卡），新用户根据当前年份动态生成
+    const hasOldTasks = meta.tasks && meta.tasks.length > 0;
+    const defaults = hasOldTasks
+      ? {
+          title: DEFAULT_TITLE,
+          mapTitle: DEFAULT_MAP_TITLE,
+          subtitle: DEFAULT_SUBTITLE,
+          startDate: DEFAULT_CHALLENGE_START,
+          endDate: DEFAULT_CHALLENGE_END,
+          subjects: JSON.parse(JSON.stringify(DEFAULT_SUBJECTS)),
+          milestones: JSON.parse(JSON.stringify(DEFAULT_MILESTONES)),
+        }
+      : getDynamicDefaultSettings();
+    meta.settings = JSON.parse(JSON.stringify(defaults));
     meta.shopItems = JSON.parse(JSON.stringify(DEFAULT_SHOP_ITEMS));
     meta.version = 3;
     saveData();
