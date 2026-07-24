@@ -14,14 +14,15 @@
 - 部署：GitHub Actions + Pages，Token 通过 Secrets 注入
 
 ## 目录与约定
-- `index.html` — 唯一源文件（~3000行）
+- `index.html` — 唯一源文件（~3600行）
 - `.github/workflows/deploy.yml` — 自动部署
 - 无构建步骤，无 node_modules
 
 ## 当前状态
-- v3.2：toolbar 统一 UI，登录状态与备份恢复同一排
+- v3.3：帮助说明页（功能/使用/更新）、首次欢迎引导、底部链接替换
 - 云端账号系统：注册/登录/登出，密码哈希存储
 - Token 占位符 `__GIST_TOKEN__` 由 Actions 部署时替换
 
-## 下一步
-- 功能稳定，等待用户反馈
+## 注意事项
+- 严禁在任何命令或回复中暴露 GitHub Token 明文，始终用环境变量 `$GITHUB_TOKEN` 引用
+- 部署通过 push master → GitHub Actions 自动完成，不要手动干预部署流程
