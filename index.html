@@ -1361,7 +1361,7 @@
       <label>标题文字（不超过10个字）</label>
       <input type="text" id="editTitle" placeholder="例如：子菡的学习冒险地图" maxlength="10">
       <label>副标题</label>
-      <input type="text" id="editSubtitle" placeholder="例如：每天前进一小步，暑假收获一大步" maxlength="30">
+      <input type="text" id="editSubtitle" placeholder="例如：每天前进一小步，暑假收获一大步" maxlength="20">
       <div class="hint">标题前3个字为红色，其余为青色，自动双色显示</div>
       <div class="editor-actions">
         <button class="save" onclick="saveTitle()">保存</button>
@@ -1523,6 +1523,19 @@ function migrateMeta() {
     meta.settings = JSON.parse(JSON.stringify(defaults));
     meta.shopItems = JSON.parse(JSON.stringify(DEFAULT_SHOP_ITEMS));
     meta.version = 3;
+    saveData();
+  }
+  if (meta.version < 4) {
+    // 自动修复过期的 2025 默认日期范围：如果今天已超出 2025 暑假范围，则同步到今年
+    const settings = getSettings();
+    const today = getTodayStr();
+    if (settings.startDate === DEFAULT_CHALLENGE_START && settings.endDate === DEFAULT_CHALLENGE_END && today > DEFAULT_CHALLENGE_END) {
+      const newDefaults = getDynamicDefaultSettings();
+      settings.startDate = newDefaults.startDate;
+      settings.endDate = newDefaults.endDate;
+      saveSettings(settings);
+    }
+    meta.version = 4;
     saveData();
   }
 }
@@ -2065,6 +2078,7 @@ function renderAll() {
   renderTasks();
   renderOverview();
   if (document.getElementById('rewardModal').classList.contains('show')) {
+    document.getElementById('modalBalance').textContent = getTotalStars();
     renderModalBody();
   }
 }
@@ -2763,6 +2777,7 @@ function saveTitle() {
     title = title.slice(0, 3) + '|' + title.slice(3);
   }
   const subtitle = document.getElementById('editSubtitle').value.trim();
+  if (subtitle.length > 20) { alert('副标题不超过20个字'); return; }
   const settings = getSettings();
   settings.title = title;
   settings.subtitle = subtitle;
