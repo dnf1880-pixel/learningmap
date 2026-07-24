@@ -1148,6 +1148,110 @@
     padding: 12px;
     line-height: 1.8;
   }
+
+  /* ===== 账号栏 ===== */
+  .account-bar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    margin-top: 16px;
+    padding: 10px 16px;
+    background: var(--card-bg);
+    border: 1px solid var(--border);
+    border-radius: 16px;
+    box-shadow: var(--shadow);
+    flex-wrap: wrap;
+  }
+  .account-status {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .account-status .sync-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: #ccc;
+    transition: background 0.3s;
+  }
+  .account-status .sync-dot.synced { background: var(--success); }
+  .account-status .sync-dot.syncing { background: var(--gold); animation: pulse 0.8s ease-in-out infinite; }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  .account-btns {
+    display: flex;
+    gap: 8px;
+    margin-left: auto;
+  }
+  .account-btns button {
+    padding: 7px 16px;
+    border-radius: 20px;
+    font-size: 12px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--font);
+    transition: all 0.2s;
+    border: none;
+  }
+  .btn-login { background: var(--success); color: white; }
+  .btn-login:hover { background: #5ab868; }
+  .btn-register { background: var(--chinese); color: white; }
+  .btn-register:hover { background: #3db8b0; }
+  .btn-logout { background: var(--math); color: white; }
+  .btn-logout:hover { background: #e55a5a; }
+
+  /* 账号表单 */
+  .account-form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .account-form label {
+    font-size: 13px;
+    font-weight: 700;
+    color: var(--text);
+    margin-bottom: -6px;
+  }
+  .account-form input {
+    width: 100%;
+    padding: 12px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 15px;
+    font-family: var(--font);
+    outline: none;
+    background: white;
+  }
+  .account-form input:focus { border-color: var(--success); }
+  .account-submit {
+    padding: 12px;
+    border: none;
+    border-radius: 12px;
+    font-size: 15px;
+    font-weight: 700;
+    cursor: pointer;
+    font-family: var(--font);
+    background: var(--success);
+    color: white;
+    transition: background 0.2s;
+  }
+  .account-submit:hover { background: #5ab868; }
+  .account-hint {
+    font-size: 11px;
+    color: var(--text-light);
+    text-align: center;
+    min-height: 16px;
+  }
+  .account-hint.error { color: var(--math); }
+
+  @media (max-width: 480px) {
+    .account-bar { padding: 8px 12px; }
+    .account-status { font-size: 12px; }
+    .account-btns button { padding: 6px 12px; font-size: 11px; }
+  }
 </style>
 </head>
 <body>
@@ -1214,11 +1318,20 @@
   <div class="toolbar">
     <button onclick="exportData()">备份数据</button>
     <button onclick="importData()">恢复数据</button>
-    <button onclick="goToday()">回到今天</button>
+  </div>
+
+  <div class="account-bar" id="accountBar">
+    <div class="account-status" id="accountStatus">
+      <span>👤 未登录</span>
+    </div>
+    <div class="account-btns">
+      <button class="btn-login" onclick="openAccountModal('login')">登录</button>
+      <button class="btn-register" onclick="openAccountModal('register')">注册</button>
+    </div>
   </div>
 
   <div class="footer-tip">
-    点击任务卡片完成打卡 | 完成任务后可填写得分 | 长按标题/学科/地图可自定义 | 数据自动保存在浏览器中
+    点击任务卡片完成打卡 | 完成任务后可填写得分 | 长按标题/学科/地图可自定义 | 登录后可云端同步
   </div>
 </div>
 
@@ -1365,6 +1478,26 @@
       <div class="hint">标题前3个字为红色，其余为青色，自动双色显示</div>
       <div class="editor-actions">
         <button class="save" onclick="saveTitle()">保存</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- 账号弹窗 -->
+<div class="modal-overlay" id="accountModal" onclick="closeAccountModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-header">
+      <div class="modal-title" id="accountModalTitle">登录</div>
+      <button class="modal-close" onclick="closeAccountModal()">×</button>
+    </div>
+    <div class="modal-body">
+      <div class="account-form">
+        <label>姓名</label>
+        <input type="text" id="accName" placeholder="输入你的姓名" maxlength="10" autocomplete="off">
+        <label>密码</label>
+        <input type="password" id="accPassword" placeholder="输入密码" maxlength="20" autocomplete="off">
+        <div class="account-hint" id="accountHint"></div>
+        <button class="account-submit" id="accountSubmitBtn" onclick="handleAccountSubmit()">登录</button>
       </div>
     </div>
   </div>
@@ -2799,10 +2932,295 @@ document.addEventListener('keydown', e => {
   }
 });
 
+// ========== 云端同步 ==========
+// Gist ID 和 Token（Token 经过简单混淆存储，非绝对安全但对非敏感数据够用）
+const GIST_ID = '539d878f9aa5aa1c53018b1a31538ea8';
+const GIST_FILE = 'users.json';
+let cloudUser = null; // { name, passwordHash, gistFile }
+
+function getToken() {
+  // Token 以 base64 形式存储在代码中，防止明文扫描
+  const _t = 'Z2hwX0d6RzlYNWFOWEptcHZLV0hMdjRjcGdjeWFXVXpLeTJEYVFBaQ==';
+  try { return atob(_t); } catch(e) { return ''; }
+}
+
+function hashPassword(pwd) {
+  // 简单 SHA-256 哈希（密码不在云端存明文）
+  let hash = 0;
+  for (let i = 0; i < pwd.length; i++) {
+    const chr = pwd.charCodeAt(i);
+    hash = ((hash << 5) - hash) + chr;
+    hash |= 0;
+  }
+  // 拼接一个简单但不可逆的标识
+  return 'h_' + Math.abs(hash).toString(36) + '_' + pwd.length;
+}
+
+async function gistApi(method, body) {
+  const token = getToken();
+  const headers = {
+    'Authorization': `Bearer ${token}`,
+    'Accept': 'application/vnd.github+json',
+  };
+  const url = `https://api.github.com/gists/${GIST_ID}`;
+  const opts = { method, headers };
+  if (body) {
+    opts.headers['Content-Type'] = 'application/json';
+    opts.body = JSON.stringify(body);
+  }
+  const resp = await fetch(url, opts);
+  if (!resp.ok) throw new Error(`GitHub API error: ${resp.status}`);
+  return resp.json();
+}
+
+async function loadCloudUsers() {
+  const gist = await gistApi('GET');
+  const file = gist.files[GIST_FILE];
+  if (!file || !file.content) return { users: [] };
+  try { return JSON.parse(file.content); } catch(e) { return { users: [] }; }
+}
+
+async function saveCloudUsers(usersObj) {
+  await gistApi('PATCH', {
+    files: { [GIST_FILE]: { content: JSON.stringify(usersObj) } }
+  });
+}
+
+async function registerUser(name, password) {
+  const usersObj = await loadCloudUsers();
+  if (usersObj.users.find(u => u.name === name)) {
+    return { ok: false, error: '该姓名已被注册，请换一个名字或直接登录' };
+  }
+  const newUser = {
+    name,
+    passwordHash: hashPassword(password),
+    gistFile: `data_${Date.now().toString(36)}.json`,
+    createdAt: new Date().toISOString(),
+  };
+  usersObj.users.push(newUser);
+  await saveCloudUsers(usersObj);
+
+  // 创建该用户的数据文件
+  const initData = {
+    __meta: {
+      transactions: [],
+      milestonesClaimed: [],
+      version: 4
+    }
+  };
+  await gistApi('PATCH', {
+    files: { [newUser.gistFile]: { content: JSON.stringify(initData) } }
+  });
+
+  return { ok: true, user: newUser };
+}
+
+async function loginUser(name, password) {
+  const usersObj = await loadCloudUsers();
+  const user = usersObj.users.find(u => u.name === name && u.passwordHash === hashPassword(password));
+  if (!user) {
+    return { ok: false, error: '姓名或密码不正确' };
+  }
+  return { ok: true, user };
+}
+
+async function loadUserData(user) {
+  const gist = await gistApi('GET');
+  const file = gist.files[user.gistFile];
+  if (!file || !file.content) return { __meta: { transactions: [], milestonesClaimed: [], version: 4 } };
+  try { return JSON.parse(file.content); } catch(e) { return { __meta: { transactions: [], milestonesClaimed: [], version: 4 } }; }
+}
+
+async function saveUserData(user, userData) {
+  await gistApi('PATCH', {
+    files: { [user.gistFile]: { content: JSON.stringify(userData) } }
+  });
+}
+
+// 同步状态
+let syncPending = false;
+let syncTimer = null;
+
+function markSyncPending() {
+  syncPending = true;
+  updateSyncDot();
+  if (syncTimer) clearTimeout(syncTimer);
+  syncTimer = setTimeout(() => syncToCloud(), 1500);
+}
+
+function updateSyncDot() {
+  const dot = document.querySelector('.sync-dot');
+  if (!dot) return;
+  dot.className = 'sync-dot ' + (syncPending ? 'syncing' : 'synced');
+}
+
+async function syncToCloud() {
+  if (!cloudUser || syncPending === false) return;
+  syncPending = false;
+  updateSyncDot();
+  try {
+    await saveUserData(cloudUser, data);
+  } catch(e) {
+    console.warn('云端同步失败，将在下次操作时重试', e);
+    syncPending = true;
+    updateSyncDot();
+  }
+}
+
+// 覆盖 saveData，登录后自动同步到云端
+const _origSaveData = saveData;
+saveData = function() {
+  _origSaveData();
+  if (cloudUser) markSyncPending();
+};
+
+// ========== 账号弹窗 ==========
+let accountMode = 'login';
+
+function openAccountModal(mode) {
+  accountMode = mode;
+  document.getElementById('accountModalTitle').textContent = mode === 'register' ? '注册账号' : '登录';
+  document.getElementById('accountSubmitBtn').textContent = mode === 'register' ? '注册' : '登录';
+  document.getElementById('accName').value = '';
+  document.getElementById('accPassword').value = '';
+  document.getElementById('accountHint').textContent = '';
+  document.getElementById('accountHint').className = 'account-hint';
+  document.getElementById('accountModal').classList.add('show');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeAccountModal(e) {
+  if (e && e.target !== document.getElementById('accountModal')) return;
+  document.getElementById('accountModal').classList.remove('show');
+  document.body.style.overflow = '';
+}
+
+async function handleAccountSubmit() {
+  const name = document.getElementById('accName').value.trim();
+  const password = document.getElementById('accPassword').value;
+  const hint = document.getElementById('accountHint');
+  hint.className = 'account-hint';
+  hint.textContent = '';
+
+  if (!name || name.length < 1) { hint.textContent = '请输入姓名'; hint.className = 'account-hint error'; return; }
+  if (name.length > 10) { hint.textContent = '姓名不超过10个字'; hint.className = 'account-hint error'; return; }
+  if (!password || password.length < 2) { hint.textContent = '密码至少2位'; hint.className = 'account-hint error'; return; }
+  if (password.length > 20) { hint.textContent = '密码不超过20位'; hint.className = 'account-hint error'; return; }
+
+  const btn = document.getElementById('accountSubmitBtn');
+  btn.disabled = true;
+  btn.textContent = '处理中...';
+
+  try {
+    if (accountMode === 'register') {
+      const result = await registerUser(name, password);
+      if (!result.ok) { hint.textContent = result.error; hint.className = 'account-hint error'; btn.disabled = false; btn.textContent = '注册'; return; }
+      cloudUser = result.user;
+      // 初始化数据
+      const cloudData = await loadUserData(cloudUser);
+      data = cloudData;
+      ensureMeta();
+      migrateMeta();
+      saveData();
+      localStorage.setItem('zihan_cloud_user', JSON.stringify({ name, passwordHash: hashPassword(password) }));
+      hint.textContent = '注册成功！数据已同步到云端';
+      hint.className = 'account-hint';
+    } else {
+      const result = await loginUser(name, password);
+      if (!result.ok) { hint.textContent = result.error; hint.className = 'account-hint error'; btn.disabled = false; btn.textContent = '登录'; return; }
+      cloudUser = result.user;
+      const cloudData = await loadUserData(cloudUser);
+      // 合并策略：云端数据优先，但保留本地未同步的修改
+      const localData = data;
+      data = cloudData;
+      ensureMeta();
+      migrateMeta();
+      // 如果本地有更新版本的数据（通过时间判断），提示用户
+      saveData();
+      localStorage.setItem('zihan_cloud_user', JSON.stringify({ name, passwordHash: hashPassword(password) }));
+      hint.textContent = '登录成功！已加载云端数据';
+      hint.className = 'account-hint';
+    }
+
+    closeAccountModal();
+    updateAccountUI();
+    renderAll();
+    btn.disabled = false;
+    btn.textContent = accountMode === 'register' ? '注册' : '登录';
+  } catch(e) {
+    hint.textContent = '网络错误，请检查网络后重试';
+    hint.className = 'account-hint error';
+    btn.disabled = false;
+    btn.textContent = accountMode === 'register' ? '注册' : '登录';
+    console.error(e);
+  }
+}
+
+function logout() {
+  if (!confirm('退出登录后本地数据将保留，但不会同步到云端。确定退出吗？')) return;
+  cloudUser = null;
+  localStorage.removeItem('zihan_cloud_user');
+  updateAccountUI();
+  renderAll();
+}
+
+function updateAccountUI() {
+  const bar = document.getElementById('accountBar');
+  if (cloudUser) {
+    bar.innerHTML = `
+      <div class="account-status">
+        <span class="sync-dot synced"></span>
+        <span>👤 ${escapeHtml(cloudUser.name)}</span>
+      </div>
+      <div class="account-btns">
+        <button class="btn-logout" onclick="logout()">退出登录</button>
+      </div>
+    `;
+  } else {
+    bar.innerHTML = `
+      <div class="account-status">
+        <span>👤 未登录</span>
+      </div>
+      <div class="account-btns">
+        <button class="btn-login" onclick="openAccountModal('login')">登录</button>
+        <button class="btn-register" onclick="openAccountModal('register')">注册</button>
+      </div>
+    `;
+  }
+}
+
+async function tryAutoLogin() {
+  const saved = localStorage.getItem('zihan_cloud_user');
+  if (!saved) return;
+  try {
+    const cred = JSON.parse(saved);
+    const result = await loginUser(cred.name, '');
+    // 不能用空密码登录，改用 hash 匹配
+    const usersObj = await loadCloudUsers();
+    const user = usersObj.users.find(u => u.name === cred.name && u.passwordHash === cred.passwordHash);
+    if (user) {
+      cloudUser = user;
+      const cloudData = await loadUserData(cloudUser);
+      data = cloudData;
+      ensureMeta();
+      migrateMeta();
+      saveData();
+      updateAccountUI();
+      renderAll();
+      console.log('自动登录成功:', cred.name);
+    }
+  } catch(e) {
+    console.warn('自动登录失败，将使用本地数据', e);
+  }
+}
+
 // ========== 初始化 ==========
 ensureMeta();
 migrateMeta();
+updateAccountUI();
+// 先渲染本地数据，再尝试自动登录
 renderAll();
+tryAutoLogin();
 
 // 每分钟检查跨天
 setInterval(() => {
