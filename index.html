@@ -102,11 +102,15 @@
     letter-spacing: 1px;
     white-space: nowrap;
   }
+  .header .title .title-part2 {
+    color: var(--chinese);
+  }
   .header .subtitle {
     font-size: 13px;
     color: var(--text-light);
     margin-top: 14px;
     font-weight: 600;
+    cursor: pointer;
   }
   .header-decos {
     position: absolute;
@@ -134,7 +138,9 @@
     font-size: 10px;
     color: #c0b8b0;
     margin-top: 6px;
+    display: none;
   }
+  .header:hover .long-press-hint { display: block; }
 
   /* ===== 统计条 ===== */
   .stats-bar {
@@ -247,7 +253,9 @@
     font-size: 10px;
     color: #c0b8b0;
     margin-left: 6px;
+    display: none;
   }
+  .subject-header:hover .subject-hint { display: block; }
 
   /* ===== 任务卡片 ===== */
   .task-card {
@@ -826,7 +834,9 @@
   .shop-item-hint {
     font-size: 9px;
     color: #c0b8b0;
+    display: none;
   }
+  .shop-item:hover .shop-item-hint { display: block; }
 
   /* ===== 通用编辑弹窗 ===== */
   .editor-overlay {
@@ -1154,10 +1164,13 @@
          onpointerdown="handleTitlePointerDown(event)"
          onpointerup="handleTitlePointerUp()"
          onpointerleave="handleTitlePointerLeave()">
-      <div class="title" id="headerTitle">子菡的学习冒险地图</div>
+      <div class="title" id="headerTitle">子菡<span class="title-part2">的学习冒险地图</span></div>
     </div>
-    <div class="subtitle" id="headerSubtitle">每天前进一小步，暑假收获一大步</div>
-    <div class="long-press-hint">长按标题可以修改文字</div>
+    <div class="subtitle" id="headerSubtitle"
+         onpointerdown="handleTitlePointerDown(event)"
+         onpointerup="handleTitlePointerUp()"
+         onpointerleave="handleTitlePointerLeave()">每天前进一小步，暑假收获一大步</div>
+    <div class="long-press-hint">长按标题或副标题可编辑</div>
   </div>
 
   <div class="stats-bar" id="statsBar"></div>
@@ -1347,6 +1360,9 @@
     <div class="editor-body">
       <label>标题文字（不超过10个字）</label>
       <input type="text" id="editTitle" placeholder="例如：子菡的学习冒险地图" maxlength="10">
+      <label>副标题</label>
+      <input type="text" id="editSubtitle" placeholder="例如：每天前进一小步，暑假收获一大步" maxlength="30">
+      <div class="hint">标题前3个字为红色，其余为青色，自动双色显示</div>
       <div class="editor-actions">
         <button class="save" onclick="saveTitle()">保存</button>
       </div>
@@ -2055,8 +2071,19 @@ function renderAll() {
 
 function renderHeader() {
   const settings = getSettings();
-  document.getElementById('headerTitle').textContent = settings.title || DEFAULT_TITLE;
+  const title = settings.title || DEFAULT_TITLE;
+  const [p1, p2] = splitTitle(title);
+  document.getElementById('headerTitle').innerHTML = `${escapeHtml(p1)}<span class="title-part2">${escapeHtml(p2)}</span>`;
   document.getElementById('headerSubtitle').textContent = settings.subtitle || DEFAULT_SUBTITLE;
+}
+
+function splitTitle(title) {
+  if (title.includes('|')) {
+    const [p1, ...rest] = title.split('|');
+    return [p1, rest.join('|')];
+  }
+  if (title.length <= 3) return [title, ''];
+  return [title.slice(0, 3), title.slice(3)];
 }
 
 function renderStats() {
@@ -2715,7 +2742,8 @@ function saveMap() {
 // ========== 标题编辑弹窗 ==========
 function openTitleEditor() {
   const settings = getSettings();
-  document.getElementById('editTitle').value = settings.title || DEFAULT_TITLE;
+  document.getElementById('editTitle').value = (settings.title || DEFAULT_TITLE).replace(/\|/g, '');
+  document.getElementById('editSubtitle').value = settings.subtitle || DEFAULT_SUBTITLE;
   document.getElementById('titleEditorOverlay').classList.add('show');
   document.body.style.overflow = 'hidden';
 }
@@ -2727,11 +2755,17 @@ function closeTitleEditor(e) {
 }
 
 function saveTitle() {
-  const title = document.getElementById('editTitle').value.trim();
+  let title = document.getElementById('editTitle').value.trim();
   if (!title) { alert('标题不能为空'); return; }
   if (title.length > 10) { alert('标题不超过10个字'); return; }
+  // 自动双色：前3个字为红色，其余为青色
+  if (title.length > 3 && !title.includes('|')) {
+    title = title.slice(0, 3) + '|' + title.slice(3);
+  }
+  const subtitle = document.getElementById('editSubtitle').value.trim();
   const settings = getSettings();
   settings.title = title;
+  settings.subtitle = subtitle;
   saveSettings(settings);
   closeTitleEditor();
   renderAll();
