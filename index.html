@@ -3,7 +3,13 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>学习地图</title>
+<meta name="theme-color" content="#fdf6f0">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="apple-mobile-web-app-title" content="亲子打卡">
+<link rel="manifest" href="data:application/json;base64,eyJuYW1lIjogIuS6suWtkOaJk+WNoSIsICJzaG9ydF9uYW1lIjogIuS6suWtkOaJk+WNoSIsICJzdGFydF91cmwiOiAiLiIsICJkaXNwbGF5IjogInN0YW5kYWxvbmUiLCAiYmFja2dyb3VuZF9jb2xvciI6ICIjZmRmNmYwIiwgInRoZW1lX2NvbG9yIjogIiNmZGY2ZjAiLCAiaWNvbnMiOiBbeyJzcmMiOiAiaWNvbi0xOTIucG5nIiwgInNpemVzIjogIjE5MngxOTIiLCAidHlwZSI6ICJpbWFnZS9wbmcifSwgeyJzcmMiOiAiaWNvbi01MTIucG5nIiwgInNpemVzIjogIjUxMng1MTIiLCAidHlwZSI6ICJpbWFnZS9wbmcifV19">
+<link rel="apple-touch-icon" href="icon-192.png">
+<title>亲子打卡</title>
 <style>
   :root {
     --bg: #fdf6f0;
@@ -616,6 +622,10 @@
     text-shadow: 0 0 2px rgba(255,255,255,0.8);
     opacity: 0.85;
   }
+  .calendar-day.milestone {
+    border-color: var(--gold);
+    box-shadow: inset 0 0 0 1px rgba(244,167,66,0.3);
+  }
 
   .calendar-legend {
     display: flex;
@@ -868,6 +878,68 @@
     overflow: hidden;
   }
   .editor-overlay.show .editor { transform: translateY(0); }
+  .effective-options {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .effective-opt {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    padding: 10px 6px;
+    border: 2px solid var(--border);
+    border-radius: 12px;
+    background: #fff;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    color: var(--text);
+    transition: all 0.15s;
+    line-height: 1.4;
+  }
+  .effective-opt small {
+    font-size: 11px;
+    font-weight: 400;
+    color: var(--text-light);
+    margin-top: 2px;
+  }
+  .effective-opt.selected {
+    border-color: var(--success);
+    background: var(--success-light);
+    color: var(--success);
+  }
+  .effective-opt.selected small { color: var(--success); }
+  .effective-opt:hover { border-color: var(--success); }
+  .weekday-checkboxes {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 4px;
+  }
+  .weekday-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 13px;
+    cursor: pointer;
+    padding: 4px 8px;
+    border-radius: 8px;
+    background: var(--border);
+    user-select: none;
+  }
+  .weekday-checkbox.checked {
+    background: var(--success-light);
+    color: var(--success);
+    font-weight: 600;
+  }
+  .weekday-checkbox input {
+    width: auto;
+    margin: 0;
+    display: none;
+  }
   .editor-header {
     padding: 20px 20px 14px;
     border-bottom: 1px solid var(--border);
@@ -1244,6 +1316,9 @@
     .icon-picker .icon-opt { width: 36px; height: 36px; font-size: 18px; }
     .milestone-row { padding: 8px; }
     .milestone-row input { width: 60px; padding: 6px; }
+    .toolbar { padding: 8px 12px; }
+    .toolbar button { padding: 6px 10px; font-size: 11px; }
+    .toolbar-user { font-size: 12px; }
   }
 
   .footer-tip {
@@ -1453,11 +1528,6 @@
   .welcome-btn.tertiary:hover { color: var(--text); }
 
 
-  @media (max-width: 480px) {
-    .toolbar { padding: 8px 12px; }
-    .toolbar button { padding: 6px 10px; font-size: 11px; }
-    .toolbar-user { font-size: 12px; }
-  }
 </style>
 </head>
 <body>
@@ -1487,7 +1557,7 @@
 
   <div class="date-nav">
     <button onclick="changeDate(-1)" title="前一天" aria-label="前一天">◀</button>
-    <div class="date-display" id="dateDisplay"></div>
+    <div class="date-display" id="dateDisplay" onclick="goToday()" style="cursor:pointer" title="点击回到今天"></div>
     <button onclick="changeDate(1)" title="后一天" aria-label="后一天">▶</button>
   </div>
 
@@ -1599,6 +1669,38 @@
       <input type="text" id="editScoreLabel" placeholder="例如：得分 0-100">
       <label>满分额外星星</label>
       <input type="number" id="editBonus" value="5" min="0" max="50" placeholder="不需要评分可填0">
+      <label>生效日期</label>
+      <div class="effective-options">
+        <button type="button" class="effective-opt selected" id="effOptToday" onclick="selectEffectiveOption('today')">
+          📅 仅当日<br><small>仅在 <span id="effTodayLabel"></span> 生效</small>
+        </button>
+        <button type="button" class="effective-opt" id="effOptFuture" onclick="selectEffectiveOption('future')">
+          🔮 当日及之后<br><small>从 <span id="effFutureLabel"></span> 到挑战结束</small>
+        </button>
+        <button type="button" class="effective-opt" id="effOptAll" onclick="selectEffectiveOption('all')">
+          📋 全范围<br><small>挑战期间所有日期</small>
+        </button>
+        <button type="button" class="effective-opt" id="effOptCustom" onclick="selectEffectiveOption('custom')">
+          ⚙️ 自定义<br><small>指定日期范围或周期</small>
+        </button>
+      </div>
+      <div id="effectiveCustomPanel" style="display:none;">
+        <select id="editEffectiveMode" onchange="handleEffectiveModeChange()">
+          <option value="single">指定单日</option>
+          <option value="range">日期范围</option>
+          <option value="weekly">按星期循环</option>
+        </select>
+        <div id="effectiveDateRange" style="display:none;">
+          <label>开始日期</label>
+          <input type="date" id="editEffectiveStart">
+          <label id="effectiveEndLabel" style="display:none;">结束日期</label>
+          <input type="date" id="editEffectiveEnd" style="display:none;">
+        </div>
+        <div id="effectiveWeekdays" style="display:none;">
+          <label>选择生效的星期</label>
+          <div class="weekday-checkboxes" id="weekdayCheckboxes"></div>
+        </div>
+      </div>
       <div class="editor-actions" id="taskEditorActions"></div>
     </div>
   </div>
@@ -1717,7 +1819,7 @@
 <div class="modal-overlay" id="helpModal" onclick="closeHelpModal(event)">
   <div class="modal help-modal" onclick="event.stopPropagation()">
     <div class="modal-header">
-      <div class="modal-title">📖 学习地图</div>
+      <div class="modal-title">📖 亲子打卡</div>
       <button class="modal-close" onclick="closeHelpModal()">×</button>
     </div>
     <div class="modal-tabs">
@@ -1733,7 +1835,7 @@
 <div class="welcome-overlay" id="welcomeOverlay">
   <div class="welcome-card">
     <div class="welcome-icon">🗺️</div>
-    <div class="welcome-title">欢迎来到学习地图！</div>
+    <div class="welcome-title">欢迎使用亲子打卡，成长从今天开始！</div>
     <div class="welcome-subtitle">
       这是一款亲子任务交互工具<br>每日打卡，点亮地图，赢取星星奖励！
     </div>
@@ -1747,8 +1849,34 @@
 </div>
 
 <script>
+// ========== PWA 支持 ==========
+if ('serviceWorker' in navigator) {
+  const swCode = `
+    self.addEventListener('install', e => {
+      e.waitUntil(self.skipWaiting());
+    });
+    self.addEventListener('activate', e => {
+      e.waitUntil(self.clients.claim());
+    });
+    self.addEventListener('fetch', e => {
+      e.respondWith(
+        caches.match(e.request).then(r => {
+          return r || fetch(e.request).then(res => {
+            const clone = res.clone();
+            caches.open('qinzidaka-v1').then(c => c.put(e.request, clone));
+            return res;
+          });
+        }).catch(() => caches.match(e.request))
+      );
+    });
+  `;
+  const blob = new Blob([swCode], { type: 'text/javascript' });
+  const swUrl = URL.createObjectURL(blob);
+  navigator.serviceWorker.register(swUrl).catch(() => {});
+}
+
 // ========== 默认配置 ==========
-const DEFAULT_TITLE = '学习地图';
+const DEFAULT_TITLE = '宝宝的成长地图';
 const DEFAULT_MAP_TITLE = '暑假挑战地图';
 const DEFAULT_SUBTITLE = '每天前进一小步，暑假收获一大步';
 const DEFAULT_CHALLENGE_START = '2025-07-24';
@@ -1768,14 +1896,14 @@ const SUBJECT_COLORS = {
 const EXTRA_SUBJECT_COLORS = ['#ff85a1', '#a78bfa', '#60a5fa', '#34d399', '#fbbf24', '#fb923c', '#22d3ee', '#a3e635'];
 
 const DEFAULT_TASKS = [
-  { id: 'math-paper', subject: 'math', emoji: '📐', name: '数学活页练习', detail: '每天完成2页活页练习', tags: [{text:'每天2页',cls:'pages'},{text:'批注得分',cls:'score'}], hasScore: true, scoreLabel: '得分 (0-100)', bonusStars: 5 },
-  { id: 'chinese-preview', subject: 'chinese', emoji: '📖', name: '语文预习知识点', detail: '每天预习2页三年级知识点', tags: [{text:'每天2页',cls:'pages'},{text:'每日',cls:'daily'}], hasScore: false, scoreLabel: '', bonusStars: 0 },
-  { id: 'chinese-exam', subject: 'chinese', emoji: '📝', name: '语文预习知识点（考试）', detail: '完成预习知识点的考试测试', tags: [{text:'考试',cls:'score'},{text:'批注得分',cls:'score'}], hasScore: true, scoreLabel: '得分 (0-100)', bonusStars: 5 },
-  { id: 'chinese-special', subject: 'chinese', emoji: '🎨', name: '语文暑假特色作业', detail: '每天背诵一半内容', tags: [{text:'背诵',cls:'daily'},{text:'每日',cls:'daily'}], hasScore: false, scoreLabel: '', bonusStars: 0 },
-  { id: 'chinese-reading', subject: 'chinese', emoji: '📚', name: '语文课外阅读', detail: '阅读格林童话、安徒生童话等经典童话', tags: [{text:'阅读',cls:'daily'},{text:'格林/安徒生',cls:'pages'}], hasScore: false, scoreLabel: '', bonusStars: 0 },
-  { id: 'english-book', subject: 'english', emoji: '🔤', name: '英语书本学习', detail: '每天学习一个单元', tags: [{text:'每天1单元',cls:'unit'},{text:'每日',cls:'daily'}], hasScore: false, scoreLabel: '', bonusStars: 0 },
-  { id: 'english-tablet', subject: 'english', emoji: '📱', name: '英语平板课文讲解', detail: '每天用平板学习一个单元课文', tags: [{text:'每天1单元',cls:'unit'},{text:'平板',cls:'daily'}], hasScore: false, scoreLabel: '', bonusStars: 0 },
-  { id: 'english-ef', subject: 'english', emoji: '🎧', name: '英孚学习', detail: '每天学习20分钟英孚课程', tags: [{text:'20分钟',cls:'time'},{text:'每日',cls:'daily'}], hasScore: false, scoreLabel: '', bonusStars: 0 }
+  { id: 'math-paper', subject: 'math', emoji: '📐', name: '数学活页练习', detail: '每天完成2页活页练习', tags: [{text:'每天2页',cls:'pages'},{text:'批注得分',cls:'score'}], hasScore: true, scoreLabel: '得分 (0-100)', bonusStars: 5, effectiveDate: { mode: 'full' } },
+  { id: 'chinese-preview', subject: 'chinese', emoji: '📖', name: '语文预习知识点', detail: '每天预习2页三年级知识点', tags: [{text:'每天2页',cls:'pages'},{text:'每日',cls:'daily'}], hasScore: false, scoreLabel: '', bonusStars: 0, effectiveDate: { mode: 'full' } },
+  { id: 'chinese-exam', subject: 'chinese', emoji: '📝', name: '语文预习知识点（考试）', detail: '完成预习知识点的考试测试', tags: [{text:'考试',cls:'score'},{text:'批注得分',cls:'score'}], hasScore: true, scoreLabel: '得分 (0-100)', bonusStars: 5, effectiveDate: { mode: 'full' } },
+  { id: 'chinese-special', subject: 'chinese', emoji: '🎨', name: '语文暑假特色作业', detail: '每天背诵一半内容', tags: [{text:'背诵',cls:'daily'},{text:'每日',cls:'daily'}], hasScore: false, scoreLabel: '', bonusStars: 0, effectiveDate: { mode: 'full' } },
+  { id: 'chinese-reading', subject: 'chinese', emoji: '📚', name: '语文课外阅读', detail: '阅读格林童话、安徒生童话等经典童话', tags: [{text:'阅读',cls:'daily'},{text:'格林/安徒生',cls:'pages'}], hasScore: false, scoreLabel: '', bonusStars: 0, effectiveDate: { mode: 'full' } },
+  { id: 'english-book', subject: 'english', emoji: '🔤', name: '英语书本学习', detail: '每天学习一个单元', tags: [{text:'每天1单元',cls:'unit'},{text:'每日',cls:'daily'}], hasScore: false, scoreLabel: '', bonusStars: 0, effectiveDate: { mode: 'full' } },
+  { id: 'english-tablet', subject: 'english', emoji: '📱', name: '英语平板课文讲解', detail: '每天用平板学习一个单元课文', tags: [{text:'每天1单元',cls:'unit'},{text:'平板',cls:'daily'}], hasScore: false, scoreLabel: '', bonusStars: 0, effectiveDate: { mode: 'full' } },
+  { id: 'english-ef', subject: 'english', emoji: '🎧', name: '英孚学习', detail: '每天学习20分钟英孚课程', tags: [{text:'20分钟',cls:'time'},{text:'每日',cls:'daily'}], hasScore: false, scoreLabel: '', bonusStars: 0, effectiveDate: { mode: 'full' } }
 ];
 
 const DEFAULT_MILESTONES = [
@@ -1914,6 +2042,18 @@ function migrateMeta() {
     meta.version = 4;
     saveData();
   }
+  if (meta.version < 5) {
+    // v5: 任务生效日期 — 旧任务自动补充 full 模式
+    if (meta.tasks) {
+      meta.tasks.forEach(t => {
+        if (!t.effectiveDate) {
+          t.effectiveDate = { mode: 'full' };
+        }
+      });
+    }
+    meta.version = 5;
+    saveData();
+  }
 }
 
 function getSubjectColor(key) {
@@ -1955,6 +2095,20 @@ function getTodayStr() {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
+function getYesterday(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  date.setDate(date.getDate() - 1);
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+
+function getTomorrow(dateStr) {
+  const [y, m, d] = dateStr.split('-').map(Number);
+  const date = new Date(y, m - 1, d);
+  date.setDate(date.getDate() + 1);
+  return `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,'0')}-${String(date.getDate()).padStart(2,'0')}`;
+}
+
 function formatDateStr(dateStr) {
   const [y, m, d] = dateStr.split('-');
   const date = new Date(+y, +m - 1, +d);
@@ -1973,7 +2127,7 @@ function ensureMeta() {
     data.__meta = {
       transactions: [],
       milestonesClaimed: [],
-      version: 3
+      version: 5
     };
   }
   return data.__meta;
@@ -1981,7 +2135,7 @@ function ensureMeta() {
 
 // ========== 多账号数据层 ==========
 function ensureMetaInData(d) {
-  if (!d.__meta) d.__meta = { transactions: [], milestonesClaimed: [], version: 3 };
+  if (!d.__meta) d.__meta = { transactions: [], milestonesClaimed: [], version: 5 };
 }
 
 function getStorageKey(name) {
@@ -2039,21 +2193,18 @@ function loadData() {
       return parsed;
     } catch { currentAccount = name; return { __meta: { transactions: [], milestonesClaimed: [], version: 3 } }; }
   }
-  // 兼容旧数据迁移
+  // 未登录用户：尝试从兼容 key 读取数据以保持跨会话持久化
   try {
     const raw = localStorage.getItem('zihan_learning_map');
     if (raw) {
       const parsed = JSON.parse(raw);
       ensureMetaInData(parsed);
-      // 迁移到默认账号但不自动登录
-      const defaultName = '子菡';
-      localStorage.setItem(getStorageKey(defaultName), JSON.stringify(parsed));
-      localStorage.removeItem('zihan_learning_map');
-      // 不自动设 active account，等用户手动登录
+      currentAccount = '';
+      return parsed;
     }
   } catch {}
   currentAccount = '';
-  return { __meta: { transactions: [], milestonesClaimed: [], version: 3 } };
+  return { __meta: { transactions: [], milestonesClaimed: [], version: 5 } };
 }
 
 function saveData() {
@@ -2063,6 +2214,8 @@ function saveData() {
     // 未登录账号时使用兼容 key
     localStorage.setItem('zihan_learning_map', JSON.stringify(data));
   }
+  // 登录后自动同步到云端
+  if (cloudUser) markSyncPending();
 }
 
 function switchAccount(name) {
@@ -2141,14 +2294,42 @@ function getDateRange(start, end) {
   return dates;
 }
 
+// ========== 任务生效日期过滤 ==========
+function isTaskEffectiveOn(task, dateStr) {
+  const ec = task.effectiveDate;
+  // 向后兼容：无 effectiveDate 字段视为 full 模式
+  if (!ec || ec.mode === 'full') return true;
+  if (ec.mode === 'single') {
+    return dateStr === ec.start;
+  }
+  if (ec.mode === 'range') {
+    return dateStr >= ec.start && dateStr <= ec.end;
+  }
+  if (ec.mode === 'weekly') {
+    const d = new Date(dateStr + 'T00:00:00');
+    const wd = d.getDay(); // 0=周日, 1=周一, ..., 6=周六
+    return ec.weekdays && ec.weekdays.includes(wd);
+  }
+  return true; // 防御性默认
+}
+
+function getEffectiveTasks(dateStr) {
+  return getTasks().filter(t => isTaskEffectiveOn(t, dateStr));
+}
+
 function getCompletedCount(dateStr) {
   const day = data[dateStr];
   if (!day) return 0;
-  return getTasks().filter(t => day[t.id] && day[t.id].done).length;
+  const tasks = getEffectiveTasks(dateStr);
+  return tasks.filter(t => day[t.id] && day[t.id].done).length;
 }
 
 function isFullDone(dateStr) {
-  return getCompletedCount(dateStr) === getTasks().length;
+  const tasks = getEffectiveTasks(dateStr);
+  if (tasks.length === 0) return false;
+  const day = data[dateStr];
+  if (!day) return false;
+  return tasks.every(t => day[t.id] && day[t.id].done);
 }
 
 function getFullDoneDays() {
@@ -2179,12 +2360,12 @@ function getBaseStars() {
 
 function getPerfectScoreBonus() {
   let bonus = 0;
-  const tasks = getTasks();
   Object.keys(data).forEach(ds => {
     if (ds === '__meta') return;
     const day = data[ds];
     if (!day) return;
-    tasks.forEach(t => {
+    const effectiveTasks = getEffectiveTasks(ds);
+    effectiveTasks.forEach(t => {
       if (t.hasScore && t.bonusStars > 0 && day[t.id] && day[t.id].score === 100) {
         bonus += t.bonusStars;
       }
@@ -2249,6 +2430,8 @@ function checkPerfectScore(taskId, score) {
   const tasks = getTasks();
   const task = tasks.find(t => t.id === taskId);
   if (!task || !task.hasScore || task.bonusStars <= 0) return;
+  // 确认任务在今天生效才触发满分奖励
+  if (!isTaskEffectiveOn(task, getTodayStr())) return;
   const meta = ensureMeta();
   const today = getTodayStr();
   const alreadyEarned = meta.transactions.some(tx => tx.type === 'earn' && tx.taskId === taskId && tx.date === today && tx.reason.includes('满分'));
@@ -2305,7 +2488,7 @@ function exportData() {
   const url = URL.createObjectURL(blob);
   const a = document.createElement('a');
   a.href = url;
-  a.download = `学习地图_${getTodayStr()}.json`;
+  a.download = `亲子打卡_${getTodayStr()}.json`;
   document.body.appendChild(a);
   a.click();
   setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 100);
@@ -2519,8 +2702,8 @@ function playSuccessSound() {
 
 function checkAllDone() {
   const day = getDayData(currentDate);
-  const tasks = getTasks();
-  const allDone = tasks.every(t => day[t.id] && day[t.id].done);
+  const tasks = getEffectiveTasks(currentDate);
+  const allDone = tasks.length > 0 && tasks.every(t => day[t.id] && day[t.id].done);
   if (allDone && !lastAllDone) {
     lastAllDone = true;
     showCelebration('🏆', '全部完成！', '子菡太厉害了，今天所有任务都完成啦！');
@@ -2599,7 +2782,7 @@ function splitTitle(title) {
 
 function renderStats() {
   const day = getDayData(currentDate);
-  const tasks = getTasks();
+  const tasks = getEffectiveTasks(currentDate);
   const total = tasks.length;
   const done = tasks.filter(t => day[t.id] && day[t.id].done).length;
   const totalStars = getTotalStars();
@@ -2634,7 +2817,7 @@ function renderTasks() {
   const subjects = getSubjects();
 
   subjects.forEach(subj => {
-    const tasks = getTasks();
+    const tasks = getEffectiveTasks(currentDate);
     const subjTasks = tasks.filter(t => t.subject === subj.key);
     const subjDone = subjTasks.filter(t => day[t.id] && day[t.id].done).length;
     const color = getSubjectColor(subj.key);
@@ -2689,6 +2872,13 @@ function renderTasks() {
   document.getElementById('taskArea').innerHTML = html;
 }
 
+function renderAddTaskButton(subjectKey) {
+  return `<div class="task-card" style="border-style:dashed;border-color:#c0d8c0;background:transparent;text-align:center;padding:12px;cursor:pointer;opacity:0.7"
+    onclick="event.stopPropagation();openTaskEditor(null);document.getElementById('editTaskSubject').value='${subjectKey}'">
+    <span style="font-size:14px;color:var(--text-light);">+ 添加任务</span>
+  </div>`;
+}
+
 function renderScoreArea(task, td) {
   if (!td.done) {
     return `<div class="score-area" onclick="event.stopPropagation()"><div class="score-hint">完成任务后可记录 ${escapeHtml(task.scoreLabel)}</div></div>`;
@@ -2738,7 +2928,7 @@ function renderOverview() {
 
   milestones.forEach(m => {
     const reached = fullDays >= m.days;
-    const claimed = data.__meta.milestonesClaimed.includes(String(m.days));
+    const claimed = ensureMeta().milestonesClaimed.includes(String(m.days));
     milestoneHtml += `
       <div class="milestone-node ${reached ? 'reached' : ''} ${claimed ? 'claimed' : ''}">
         <div class="dot" title="${m.days}天奖励"></div>
@@ -2755,7 +2945,6 @@ function renderOverview() {
   const today = getTodayStr();
   let gridHtml = '';
   const milestoneDates = getMilestoneDates();
-  const total = getTasks().length;
 
   dates.forEach(ds => {
     const count = getCompletedCount(ds);
@@ -2763,12 +2952,13 @@ function renderOverview() {
     const isToday = ds === today;
     const isFuture = ds > today;
     const milestoneDay = milestoneDates[ds];
-    const cls = count === total ? 'done-8' : count >= total * 0.75 ? 'done-6' : count >= total * 0.5 ? 'done-4' : count > 0 ? 'done-2' : 'done-0';
-    const mark = count === total ? `${total}/${total}` : count > 0 ? `${count}/${total}` : '';
+    const dayTotal = getEffectiveTasks(ds).length;
+    const cls = dayTotal === 0 ? 'done-0' : count === dayTotal ? 'done-8' : count >= dayTotal * 0.75 ? 'done-6' : count >= dayTotal * 0.5 ? 'done-4' : count > 0 ? 'done-2' : 'done-0';
+    const mark = dayTotal > 0 && count === dayTotal ? `${dayTotal}/${dayTotal}` : dayTotal > 0 && count > 0 ? `${count}/${dayTotal}` : '';
 
     gridHtml += `
       <div class="calendar-day ${cls} ${isToday ? 'today' : ''} ${isFuture ? 'future' : ''} ${milestoneDay ? 'milestone' : ''}"
-           onclick="jumpToDate('${ds}')" title="${fmt.full} 完成 ${count}/${total}${milestoneDay ? ' · 第'+milestoneDay+'天里程碑' : ''}">
+           onclick="jumpToDate('${ds}')" title="${fmt.full} 完成 ${count}/${dayTotal}${milestoneDay ? ' · 第'+milestoneDay+'天里程碑' : ''}">
         <span class="day-num">${+ds.split('-')[2]}</span>
         ${mark ? `<span class="day-mark">${mark}</span>` : ''}
         ${milestoneDay ? '<span class="milestone-star">★</span>' : ''}
@@ -2843,6 +3033,109 @@ function handleShopPointerUp() { endLongPress(); }
 function handleShopPointerLeave() { endLongPress(); }
 
 // ========== 任务编辑弹窗 ==========
+let selectedEffectiveOption = 'all'; // 'all' | 'today' | 'future' | 'custom'
+
+function selectEffectiveOption(option) {
+  // 如果选择的选项会覆盖历史日期，弹窗提醒
+  if (option !== selectedEffectiveOption && wouldAffectHistory(option)) {
+    if (!confirm(`⚠️ 你选择的范围涉及历史日期（${getHistoryRangeText(option)}）：点亮天数和对应星星会受到影响。\n确定要继续吗？`)) return;
+  }
+
+  selectedEffectiveOption = option;
+  document.querySelectorAll('.effective-opt').forEach(el => el.classList.remove('selected'));
+  document.getElementById('effOpt' + option.charAt(0).toUpperCase() + option.slice(1)).classList.add('selected');
+
+  const customPanel = document.getElementById('effectiveCustomPanel');
+  if (option === 'custom') {
+    customPanel.style.display = '';
+    handleEffectiveModeChange();
+  } else {
+    customPanel.style.display = 'none';
+  }
+}
+
+// 判断当前选项是否会覆盖历史日期
+function wouldAffectHistory(option) {
+  const today = getTodayStr();
+  if (option === 'all') return getChallengeStart() < today;
+  if (option === 'future') return currentDate < today;
+  if (option === 'today') return currentDate < today;
+  // custom：读取自定义面板当前模式判断
+  if (option === 'custom') {
+    const cm = document.getElementById('editEffectiveMode').value;
+    const cs = document.getElementById('editEffectiveStart').value;
+    if (cm === 'single') return cs < today;
+    if (cm === 'range') return cs < today;
+    return getChallengeStart() < today;
+  }
+  return false;
+}
+
+// 获取涉及历史日期的范围文本
+function getHistoryRangeText(option) {
+  const today = getTodayStr();
+  let start, end;
+  if (option === 'all') { start = getChallengeStart(); end = getYesterday(today); }
+  else if (option === 'future') { start = currentDate; end = getYesterday(today); }
+  else if (option === 'today') { start = currentDate; end = currentDate; }
+  else if (option === 'custom') {
+    start = document.getElementById('editEffectiveStart').value;
+    const cm = document.getElementById('editEffectiveMode').value;
+    end = cm === 'range' ? document.getElementById('editEffectiveEnd').value : start;
+    if (end >= today) end = getYesterday(today);
+  }
+  if (!start || start > end) return '';
+  const sf = formatDateStr(start).full;
+  const ef = formatDateStr(end).full;
+  return start === end ? sf : `${sf}~${ef}`;
+}
+
+function handleEffectiveModeChange() {
+  const mode = document.getElementById('editEffectiveMode').value;
+  const dateRange = document.getElementById('effectiveDateRange');
+  const endLabel = document.getElementById('effectiveEndLabel');
+  const endInput = document.getElementById('editEffectiveEnd');
+  const weekdays = document.getElementById('effectiveWeekdays');
+
+  if (mode === 'single') {
+    dateRange.style.display = '';
+    endLabel.style.display = 'none';
+    endInput.style.display = 'none';
+    weekdays.style.display = 'none';
+  } else if (mode === 'range') {
+    dateRange.style.display = '';
+    endLabel.style.display = '';
+    endInput.style.display = '';
+    weekdays.style.display = 'none';
+  } else if (mode === 'weekly') {
+    dateRange.style.display = 'none';
+    weekdays.style.display = '';
+  }
+}
+
+function renderWeekdayCheckboxes(selected) {
+  const names = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+  const sel = selected || [];
+  let html = '';
+  names.forEach((name, i) => {
+    html += `<label class="weekday-checkbox ${sel.includes(i) ? 'checked' : ''}" onclick="toggleWeekday(this)">
+      <input type="checkbox" value="${i}" ${sel.includes(i) ? 'checked' : ''}>${name}
+    </label>`;
+  });
+  document.getElementById('weekdayCheckboxes').innerHTML = html;
+}
+
+function toggleWeekday(el) {
+  el.classList.toggle('checked');
+  const cb = el.querySelector('input');
+  cb.checked = !cb.checked;
+}
+
+function getSelectedWeekdays() {
+  const cbs = document.querySelectorAll('#weekdayCheckboxes input');
+  return Array.from(cbs).filter(cb => cb.checked).map(cb => parseInt(cb.value));
+}
+
 function openTaskEditor(taskId) {
   editingTaskId = taskId;
   const tasks = getTasks();
@@ -2864,7 +3157,7 @@ function openTaskEditor(taskId) {
   let iconHtml = '';
   const currentEmoji = task ? task.emoji : '📐';
   ICON_OPTIONS.forEach(icon => {
-    iconHtml += `<div class="icon-opt ${icon === currentEmoji ? 'selected' : ''}" onclick="selectTaskIcon('${icon}')">${icon}</div>`;
+    iconHtml += `<div class="icon-opt ${icon === currentEmoji ? 'selected' : ''}" onclick="selectTaskIcon('${icon}', event)">${icon}</div>`;
   });
   document.getElementById('iconPicker').innerHTML = iconHtml;
 
@@ -2873,6 +3166,25 @@ function openTaskEditor(taskId) {
     actionsHtml += '<button class="delete" onclick="deleteTask()">删除任务</button>';
   }
   document.getElementById('taskEditorActions').innerHTML = actionsHtml;
+
+  // 新增和修改都默认：仅当日
+  selectedEffectiveOption = 'today';
+
+  // 更新 UI
+  document.querySelectorAll('.effective-opt').forEach(el => el.classList.remove('selected'));
+  document.getElementById('effOpt' + selectedEffectiveOption.charAt(0).toUpperCase() + selectedEffectiveOption.slice(1)).classList.add('selected');
+  document.getElementById('effectiveCustomPanel').style.display = selectedEffectiveOption === 'custom' ? '' : 'none';
+
+  // 更新日期标签
+  document.getElementById('effTodayLabel').textContent = formatDateStr(currentDate).full;
+  document.getElementById('effFutureLabel').textContent = formatDateStr(currentDate).full;
+
+  // 回填自定义面板的值（默认当前日期）
+  document.getElementById('editEffectiveMode').value = 'range';
+  document.getElementById('editEffectiveStart').value = currentDate;
+  document.getElementById('editEffectiveEnd').value = getChallengeEnd();
+  renderWeekdayCheckboxes([]);
+  if (selectedEffectiveOption === 'custom') handleEffectiveModeChange();
 
   document.getElementById('taskEditorOverlay').classList.add('show');
   document.body.style.overflow = 'hidden';
@@ -2925,9 +3237,9 @@ function renderTagPreview() {
   ).join('');
 }
 
-function selectTaskIcon(icon) {
+function selectTaskIcon(icon, e) {
   document.querySelectorAll('#iconPicker .icon-opt').forEach(el => el.classList.remove('selected'));
-  event.target.classList.add('selected');
+  e.currentTarget.classList.add('selected');
 }
 
 function getSelectedTaskIcon() {
@@ -2938,9 +3250,39 @@ function getSelectedTaskIcon() {
 function saveTask() {
   const name = document.getElementById('editTaskName').value.trim();
   if (!name) { alert('请输入任务名称'); return; }
+
+  // 如果当前选项会覆盖历史日期，二次确认
+  if (wouldAffectHistory(selectedEffectiveOption)) {
+    if (!confirm(`⚠️ 你选择的范围涉及历史日期（${getHistoryRangeText(selectedEffectiveOption)}）：点亮天数和对应星星会受到影响。\n确定要保存吗？`)) return;
+  }
+
   const tasks = getTasks();
   const scoreLabel = document.getElementById('editScoreLabel').value.trim();
   const bonusStars = parseInt(document.getElementById('editBonus').value) || 0;
+
+  // 组装生效日期配置 — 根据选中的预设选项
+  let effectiveDate;
+  if (selectedEffectiveOption === 'all') {
+    effectiveDate = { mode: 'full' };
+  } else if (selectedEffectiveOption === 'today') {
+    effectiveDate = { mode: 'single', start: currentDate };
+  } else if (selectedEffectiveOption === 'future') {
+    effectiveDate = { mode: 'range', start: currentDate, end: getChallengeEnd() };
+  } else {
+    // 自定义模式：从自定义面板读取
+    const effectiveMode = document.getElementById('editEffectiveMode').value;
+    effectiveDate = { mode: effectiveMode };
+    if (effectiveMode === 'single' || effectiveMode === 'range') {
+      effectiveDate.start = document.getElementById('editEffectiveStart').value;
+    }
+    if (effectiveMode === 'range') {
+      effectiveDate.end = document.getElementById('editEffectiveEnd').value;
+    }
+    if (effectiveMode === 'weekly') {
+      effectiveDate.weekdays = getSelectedWeekdays();
+    }
+  }
+
   const taskData = {
     id: editingTaskId || ('custom-' + Date.now()),
     subject: document.getElementById('editTaskSubject').value,
@@ -2951,6 +3293,7 @@ function saveTask() {
     hasScore: !!scoreLabel,
     scoreLabel: scoreLabel || '',
     bonusStars: !!scoreLabel ? bonusStars : 0,
+    effectiveDate,
   };
 
   if (editingTaskId) {
@@ -2966,20 +3309,183 @@ function saveTask() {
 }
 
 function deleteTask() {
-  if (!confirm('确定要删除这个任务吗？')) return;
+  if (!confirm('确定要按当前生效范围删除此任务吗？')) return;
+
+  // 如果删除范围涉及历史日期，二次确认
+  if (wouldAffectHistory(selectedEffectiveOption)) {
+    if (!confirm(`⚠️ 你选择的范围涉及历史日期（${getHistoryRangeText(selectedEffectiveOption)}）：点亮天数和对应星星会受到影响。\n确定要删除吗？`)) return;
+  }
+
   let tasks = getTasks();
-  tasks = tasks.filter(t => t.id !== editingTaskId);
+  const idx = tasks.findIndex(t => t.id === editingTaskId);
+  if (idx < 0) return;
+  const task = tasks[idx];
+  if (!task.effectiveDate) task.effectiveDate = { mode: 'full' };
+
+  // 根据当前管理器中选择的范围，构造要删除的范围
+  let removeRange;
+  if (selectedEffectiveOption === 'all') {
+    removeRange = { mode: 'all' };
+  } else if (selectedEffectiveOption === 'today') {
+    removeRange = { mode: 'single', start: currentDate };
+  } else if (selectedEffectiveOption === 'future') {
+    removeRange = { mode: 'range', start: currentDate, end: getChallengeEnd() };
+  } else {
+    // 自定义
+    const customMode = document.getElementById('editEffectiveMode').value;
+    if (customMode === 'single') {
+      removeRange = { mode: 'single', start: document.getElementById('editEffectiveStart').value };
+    } else if (customMode === 'range') {
+      removeRange = { mode: 'range', start: document.getElementById('editEffectiveStart').value, end: document.getElementById('editEffectiveEnd').value };
+    } else {
+      removeRange = { mode: 'weekly', weekdays: getSelectedWeekdays() };
+    }
+  }
+
+  const result = removeEffectiveRange(task, removeRange);
+  if (result === null) {
+    tasks.splice(idx, 1);
+  } else if (Array.isArray(result)) {
+    tasks.splice(idx, 1, ...result);
+  } else {
+    tasks[idx] = result;
+  }
+
   saveTasks(tasks);
   closeTaskEditor();
   renderAll();
 }
 
-// 在科目区域底部添加"新增任务"按钮
-function renderAddTaskButton(subjectKey) {
-  return `<div class="task-card" style="border-style:dashed;border-color:#c0d8c0;background:transparent;text-align:center;padding:12px;cursor:pointer;opacity:0.7"
-    onclick="event.stopPropagation();openTaskEditor(null);document.getElementById('editTaskSubject').value='${subjectKey}'">
-    <span style="font-size:14px;color:var(--text-light);">+ 添加任务</span>
-  </div>`;
+// 从任务的生效范围中删除指定范围，返回处理后的任务（或 null 表示完全删除，或数组表示拆分）
+function removeEffectiveRange(task, remove) {
+  const ec = task.effectiveDate;
+  const cs = getChallengeStart();
+  const ce = getChallengeEnd();
+
+  if (remove.mode === 'all') return null;
+  if (remove.mode === 'single') return removeSingleDay(task, remove.start, cs, ce);
+  if (remove.mode === 'range') return removeRangeDays(task, remove.start, remove.end, cs, ce);
+  if (remove.mode === 'weekly') return removeWeeklyDays(task, remove.weekdays, cs, ce);
+  return task;
+}
+
+function removeSingleDay(task, day, cs, ce) {
+  const ec = task.effectiveDate;
+  if (ec.mode === 'full') return splitRange(cs, ce, day, task);
+  if (ec.mode === 'single') {
+    if (ec.start === day) return null;
+    return task;
+  }
+  if (ec.mode === 'range') {
+    if (day < ec.start || day > ec.end) return task;
+    return splitRange(ec.start, ec.end, day, task);
+  }
+  if (ec.mode === 'weekly') {
+    const d = new Date(day + 'T00:00:00');
+    const wd = d.getDay();
+    if (!ec.weekdays.includes(wd)) return task;
+    const newWeekdays = ec.weekdays.filter(w => w !== wd);
+    if (newWeekdays.length === 0) return null;
+    return { ...task, effectiveDate: { ...ec, weekdays: newWeekdays } };
+  }
+  return task;
+}
+
+function removeRangeDays(task, start, end, cs, ce) {
+  const ec = task.effectiveDate;
+  if (ec.mode === 'full') return splitByRange(cs, ce, start, end, task);
+  if (ec.mode === 'single') {
+    if (ec.start >= start && ec.start <= end) return null;
+    return task;
+  }
+  if (ec.mode === 'range') return splitByRange(ec.start, ec.end, start, end, task);
+  if (ec.mode === 'weekly') {
+    const newTask = { ...task, effectiveDate: { mode: 'full' } };
+    return removeRangeDays(newTask, start, end, cs, ce);
+  }
+  return task;
+}
+
+function removeWeeklyDays(task, weekdays, cs, ce) {
+  const ec = task.effectiveDate;
+  if (ec.mode === 'full') {
+    const kept = [0,1,2,3,4,5,6].filter(d => !weekdays.includes(d));
+    if (kept.length === 0) return null;
+    return { ...task, effectiveDate: { mode: 'weekly', weekdays: kept } };
+  }
+  if (ec.mode === 'single') {
+    const d = new Date(ec.start + 'T00:00:00');
+    if (weekdays.includes(d.getDay())) return null;
+    return task;
+  }
+  if (ec.mode === 'range') return splitRangeByWeekdays(ec.start, ec.end, weekdays, task);
+  if (ec.mode === 'weekly') {
+    const kept = ec.weekdays.filter(d => !weekdays.includes(d));
+    if (kept.length === 0) return null;
+    return { ...task, effectiveDate: { ...ec, weekdays: kept } };
+  }
+  return task;
+}
+
+function splitRangeByWeekdays(start, end, excludedWeekdays, task) {
+  const dates = getDateRange(start, end);
+  const validDates = dates.filter(ds => {
+    const d = new Date(ds + 'T00:00:00');
+    return !excludedWeekdays.includes(d.getDay());
+  });
+  if (validDates.length === 0) return null;
+  const ranges = [];
+  let curStart = validDates[0], curEnd = validDates[0];
+  for (let i = 1; i < validDates.length; i++) {
+    const next = validDates[i];
+    const expected = getTomorrow(curEnd);
+    if (next === expected) {
+      curEnd = next;
+    } else {
+      ranges.push({ start: curStart, end: curEnd });
+      curStart = curEnd = next;
+    }
+  }
+  ranges.push({ start: curStart, end: curEnd });
+  if (ranges.length === 0) return null;
+  if (ranges.length === 1) return { ...task, effectiveDate: { mode: 'range', start: ranges[0].start, end: ranges[0].end } };
+  return ranges.map((r, i) => ({ ...structuredClone(task), id: task.id + '-split-' + Date.now() + '-' + i, effectiveDate: { mode: 'range', start: r.start, end: r.end } }));
+}
+
+function splitRange(start, end, day, task) {
+  if (day < start || day > end) return task;
+  const yest = getYesterday(day);
+  const tmrw = getTomorrow(day);
+  const hasLeft = yest >= start;
+  const hasRight = tmrw <= end;
+  if (!hasLeft && !hasRight) return null;
+  if (hasLeft && !hasRight) return { ...task, effectiveDate: { mode: 'range', start, end: yest } };
+  if (!hasLeft && hasRight) return { ...task, effectiveDate: { mode: 'range', start: tmrw, end } };
+  const left = { ...task, effectiveDate: { mode: 'range', start, end: yest } };
+  const right = { ...structuredClone(task), id: task.id + '-split-' + Date.now(), effectiveDate: { mode: 'range', start: tmrw, end } };
+  return [left, right];
+}
+
+function splitByRange(start, end, rStart, rEnd, task) {
+  const isStart = rStart < start ? start : rStart;
+  const isEnd = rEnd > end ? end : rEnd;
+  if (isStart > isEnd) return task;
+  const hasLeft = isStart > start;
+  const hasRight = isEnd < end;
+  if (!hasLeft && !hasRight) return null;
+  if (hasLeft && !hasRight) {
+    const yest = getYesterday(isStart);
+    return { ...task, effectiveDate: { mode: 'range', start, end: yest } };
+  }
+  if (!hasLeft && hasRight) {
+    const tmrw = getTomorrow(isEnd);
+    return { ...task, effectiveDate: { mode: 'range', start: tmrw, end } };
+  }
+  const yest = getYesterday(isStart);
+  const tmrw = getTomorrow(isEnd);
+  const left = { ...task, effectiveDate: { mode: 'range', start, end: yest } };
+  const right = { ...structuredClone(task), id: task.id + '-split-' + Date.now(), effectiveDate: { mode: 'range', start: tmrw, end } };
+  return [left, right];
 }
 
 // ========== 商品编辑弹窗 ==========
@@ -2999,7 +3505,7 @@ function openShopEditor(itemId) {
   let iconHtml = '';
   SHOP_ICON_KEYS.forEach(key => {
     const svg = SHOP_ICONS[key] || SHOP_ICONS.star;
-    iconHtml += `<div class="icon-opt ${key === currentIcon ? 'selected' : ''}" onclick="selectShopIcon('${key}')" title="${key}">${svg}</div>`;
+    iconHtml += `<div class="icon-opt ${key === currentIcon ? 'selected' : ''}" onclick="selectShopIcon('${key}', event)" title="${key}">${svg}</div>`;
   });
   document.getElementById('shopIconPicker').innerHTML = iconHtml;
 
@@ -3020,9 +3526,9 @@ function closeShopEditor(e) {
   editingShopId = null;
 }
 
-function selectShopIcon(key) {
+function selectShopIcon(key, e) {
   document.querySelectorAll('#shopIconPicker .icon-opt').forEach(el => el.classList.remove('selected'));
-  event.currentTarget.classList.add('selected');
+  e.currentTarget.classList.add('selected');
 }
 
 function getSelectedShopIcon() {
@@ -3083,7 +3589,7 @@ function openSubjectEditor(key, callback) {
   const currentIcon = subject ? subject.icon : SUBJECT_ICON_OPTIONS[0];
   let iconHtml = '';
   SUBJECT_ICON_OPTIONS.forEach(icon => {
-    iconHtml += `<div class="icon-opt ${icon === currentIcon ? 'selected' : ''}" onclick="selectSubjectIcon('${icon}')">${icon}</div>`;
+    iconHtml += `<div class="icon-opt ${icon === currentIcon ? 'selected' : ''}" onclick="selectSubjectIcon('${icon}', event)">${icon}</div>`;
   });
   document.getElementById('subjectIconPicker').innerHTML = iconHtml;
 
@@ -3105,9 +3611,9 @@ function closeSubjectEditor(e) {
   if (!subjectEditCallback) renderAll();
 }
 
-function selectSubjectIcon(icon) {
+function selectSubjectIcon(icon, e) {
   document.querySelectorAll('#subjectIconPicker .icon-opt').forEach(el => el.classList.remove('selected'));
-  event.target.classList.add('selected');
+  e.currentTarget.classList.add('selected');
 }
 
 function getSelectedSubjectIcon() {
@@ -3243,7 +3749,7 @@ function saveMap() {
 
   // 清理已不存在的里程碑奖励记录，避免显示问题
   const validDays = new Set(milestones.map(m => String(m.days)));
-  data.__meta.milestonesClaimed = data.__meta.milestonesClaimed.filter(key => validDays.has(key));
+  ensureMeta().milestonesClaimed = ensureMeta().milestonesClaimed.filter(key => validDays.has(key));
 
   saveSettings(settings);
   closeMapEditor();
@@ -3308,14 +3814,13 @@ function getToken() {
 }
 
 function hashPassword(pwd) {
-  // 简单 SHA-256 哈希（密码不在云端存明文）
+  // 简单哈希（亲子应用，安全性需求不高，避免存明文即可）
   let hash = 0;
   for (let i = 0; i < pwd.length; i++) {
     const chr = pwd.charCodeAt(i);
     hash = ((hash << 5) - hash) + chr;
     hash |= 0;
   }
-  // 拼接一个简单但不可逆的标识
   return 'h_' + Math.abs(hash).toString(36) + '_' + pwd.length;
 }
 
@@ -3429,13 +3934,6 @@ async function syncToCloud() {
     updateSyncDot();
   }
 }
-
-// 覆盖 saveData，登录后自动同步到云端
-const _origSaveData = saveData;
-saveData = function() {
-  _origSaveData();
-  if (cloudUser) markSyncPending();
-};
 
 // ========== 账号弹窗 ==========
 let accountMode = 'login';
@@ -3556,7 +4054,7 @@ function logout() {
   if (!confirm('退出登录后本地数据将保留，但不会同步到云端。确定退出吗？')) return;
   // 保存当前数据
   if (currentAccount) saveData();
-  removeSavedAccount(cloudUser.name);
+  if (cloudUser) removeSavedAccount(cloudUser.name);
   cloudUser = null;
   setActiveAccount('');
   // 加载一个空数据（未登录状态）
@@ -3710,8 +4208,8 @@ function renderHelpBody() {
   if (currentHelpTab === 'help-about') {
     body.innerHTML = `
       <div class="help-section">
-        <h3>🗺️ 学习地图是什么？</h3>
-        <p>学习地图是多用户可自定义的亲子任务交互系统。通过每日打卡完成任务，点亮地图板块，赚取星星奖励，在星星商店兑换心仪的奖品！</p>
+        <h3>🗺️ 亲子打卡是什么？</h3>
+        <p>亲子打卡是多用户可自定义的亲子任务交互系统。通过每日打卡完成任务，点亮地图板块，赚取星星奖励，在星星商店兑换心仪的奖品！</p>
       </div>
       <div class="help-section">
         <h3>⭐ 核心功能</h3>
@@ -3760,6 +4258,18 @@ function renderHelpBody() {
   } else if (currentHelpTab === 'help-changelog') {
     body.innerHTML = `
       <div class="version-timeline">
+        <div class="version-item major">
+          <span class="version-tag major">大版本 v3.5</span><span class="version-date">2025年8月</span>
+          <div class="version-desc">
+            <ul>
+              <li>📱 PWA 支持：可添加到手机桌面，像原生 APP 一样使用，支持离线缓存</li>
+              <li>🎨 品牌升级：应用更名为"亲子打卡"，全新紫橙渐变图标</li>
+              <li>📅 生效日期管理器：新增/修改/删除任务统一默认"仅当日"，保护历史数据</li>
+              <li>⚠️ 历史数据保护：涉及历史日期的操作会弹窗确认，防止误改</li>
+              <li>🔧 代码健壮性：修复多项空指针风险、全局变量依赖、数据持久化问题</li>
+            </ul>
+          </div>
+        </div>
         <div class="version-item major">
           <span class="version-tag major">大版本 v3.4</span><span class="version-date">2025年7月</span>
           <div class="version-desc">
@@ -3864,7 +4374,7 @@ setInterval(() => {
   }
 }, 60000);
 
-console.log('学习地图已就绪');
+console.log('亲子打卡已就绪');
 </script>
 
 </body>
