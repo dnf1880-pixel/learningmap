@@ -4364,67 +4364,88 @@ function renderHelpBody() {
     body.innerHTML = `
       <div class="version-timeline">
         <div class="version-item major">
-          <span class="version-tag major">大版本 v3.5</span><span class="version-date">2025年8月</span>
+          <span class="version-tag major">大版本 v5.0</span><span class="version-date">2026年7月27日 22:46</span>
           <div class="version-desc">
             <ul>
-              <li>📱 PWA 支持：可添加到手机桌面，像原生 APP 一样使用，支持离线缓存</li>
-              <li>🎨 品牌升级：应用更名为"亲子打卡"，全新紫橙渐变图标</li>
-              <li>📅 生效日期管理器：新增/修改/删除任务统一默认"仅当日"，保护历史数据</li>
-              <li>⚠️ 历史数据保护：涉及历史日期的操作会弹窗确认，防止误改</li>
-              <li>🔧 代码健壮性：修复多项空指针风险、全局变量依赖、数据持久化问题</li>
+              <li>📱 PWA 支持，可添加到手机桌面，离线可用</li>
+              <li>📲 工具栏"安装"按钮，iOS 图文引导添加</li>
+              <li>🎨 品牌更名"亲子打卡"，全新紫橙渐变图标</li>
+              <li>📅 新增/修改/删除任务统一默认仅当日生效</li>
+              <li>⚠️ 涉及历史日期的操作弹窗确认，防止误改</li>
+              <li>🔧 修复空指针、全局变量依赖、数据持久化问题</li>
             </ul>
           </div>
         </div>
         <div class="version-item major">
-          <span class="version-tag major">大版本 v3.4</span><span class="version-date">2025年7月</span>
+          <span class="version-tag major">大版本 v4.0</span><span class="version-date">2026年7月24日 22:22</span>
           <div class="version-desc">
             <ul>
-              <li>👥 多账号切换：支持家庭多孩各自独立账号，点击用户名下拉切换</li>
-              <li>🔀 数据隔离：每个账号独立保存标题、任务、地图、商店等设置</li>
-              <li>🔧 修复登录/退出按钮可见性问题</li>
+              <li>👥 多账号切换，家庭多孩各自独立账号使用</li>
+              <li>🔀 每个账号独立保存标题、任务、商店等数据</li>
+              <li>🔧 修复登录/退出按钮可见性异常问题</li>
             </ul>
           </div>
         </div>
-        <div class="version-item major">
-          <span class="version-tag major">大版本 v3.3</span><span class="version-date">2025年7月</span>
+        <div class="version-item minor">
+          <span class="version-tag minor">小版本 v3.2</span><span class="version-date">2026年7月24日 21:45</span>
           <div class="version-desc">
             <ul>
-              <li>📖 新增帮助说明页面（功能说明/使用说明/更新记录）</li>
-              <li>👋 首次访问欢迎引导页，引导注册/登录/阅读说明</li>
+              <li>📖 新增帮助说明页，功能/使用/更新三标签</li>
+              <li>👋 首次访问弹出欢迎引导，引导注册或登录</li>
               <li>🔗 底部链接改为"点击查看使用说明及更新"</li>
             </ul>
           </div>
         </div>
-        <div class="version-item major">
-          <span class="version-tag major">大版本 v3.0</span><span class="version-date">2025年7月</span>
+        <div class="version-item minor">
+          <span class="version-tag minor">小版本 v3.1</span><span class="version-date">2026年7月24日 20:32</span>
           <div class="version-desc">
             <ul>
-              <li>🌟 云端账号系统：注册/登录/登出，数据自动同步到 GitHub Gist</li>
-              <li>🎨 Toolbar UI 重构：登录状态与备份恢复统一布局</li>
-              <li>🔐 Token 安全方案：GitHub Actions + Secrets 自动部署</li>
+              <li>🎨 备份恢复按钮合并，Toolbar 统一布局</li>
+              <li>🔑 登录注册统一入口，密码支持显隐切换</li>
+              <li>📛 品牌改名"学习地图"</li>
             </ul>
           </div>
         </div>
         <div class="version-item major">
-          <span class="version-tag major">大版本 v2</span><span class="version-date">2025年7月</span>
+          <span class="version-tag major">大版本 v3.0</span><span class="version-date">2026年7月24日 19:37</span>
           <div class="version-desc">
             <ul>
-              <li>⭐ 星星商店系统：兑换奖励、兑换记录、星星明细</li>
-              <li>🗺️ 冒险地图可视化：打卡进度地图板块</li>
-              <li>🏆 里程碑奖励系统：连续打卡额外星星</li>
-              <li>🎉 庆祝动画：满分/里程碑达成特效</li>
-              <li>✏️ 全面自定义编辑：标题、学科、地图、任务、商品</li>
+              <li>🌟 云端账号系统：注册/登录/登出，数据云端同步</li>
+              <li>☁️ 数据同步至 GitHub Gist，多端共享</li>
+              <li>🔐 Actions + Secrets 自动部署，Token 安全不泄露</li>
+            </ul>
+          </div>
+        </div>
+        <div class="version-item minor">
+          <span class="version-tag minor">小版本 v2.1</span><span class="version-date">2026年7月24日 17:17</span>
+          <div class="version-desc">
+            <ul>
+              <li>✏️ 标题支持双色显示和副标题编辑</li>
+              <li>📅 过期日期自动同步到当前年份</li>
+              <li>🛒 商店余额实时刷新，兑换更流畅</li>
             </ul>
           </div>
         </div>
         <div class="version-item major">
-          <span class="version-tag major">大版本 v1</span><span class="version-date">2025年7月</span>
+          <span class="version-tag major">大版本 v2.0</span><span class="version-date">2026年7月24日 16:38</span>
           <div class="version-desc">
             <ul>
-              <li>📋 每日打卡系统：数学/语文/英语三大科目</li>
-              <li>📅 日期导航：支持补打卡和历史回顾</li>
+              <li>⭐ 星星商店上线：兑换奖励、记录、明细</li>
+              <li>🗺️ 冒险地图打卡进度可视化板块</li>
+              <li>🏆 里程碑奖励系统，连续打卡额外星星</li>
+              <li>🎉 满分/里程碑达成庆祝动画特效</li>
+              <li>✏️ 标题、学科、地图、任务、商品全面自定义</li>
+            </ul>
+          </div>
+        </div>
+        <div class="version-item major">
+          <span class="version-tag major">大版本 v1.0</span><span class="version-date">2026年7月24日 15:31</span>
+          <div class="version-desc">
+            <ul>
+              <li>📋 每日打卡系统：数学、语文、英语三大科目</li>
+              <li>📅 日期导航，支持补打卡和历史回顾</li>
               <li>📊 统计面板：完成度、星星数、点亮天数</li>
-              <li>💾 本地备份/恢复：JSON 文件导入导出</li>
+              <li>💾 本地备份恢复：JSON 文件导入导出</li>
             </ul>
           </div>
         </div>
