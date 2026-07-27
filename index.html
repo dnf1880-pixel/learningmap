@@ -1186,6 +1186,17 @@
     display: flex;
     gap: 6px;
   }
+  #pwaInstallBtn {
+    background: linear-gradient(135deg, #7c3aed, #f97316);
+    color: #fff;
+    font-weight: 600;
+    border: none;
+    animation: pulse-install 2s ease-in-out infinite;
+  }
+  @keyframes pulse-install {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.4); }
+    50% { box-shadow: 0 0 0 6px rgba(124, 58, 237, 0); }
+  }
   .toolbar-user {
     font-size: 13px;
     font-weight: 700;
@@ -1598,6 +1609,7 @@
       <button class="btn-logout toolbar-btn-hidden" id="btnLogout" onclick="logout()">退出</button>
     </div>
     <div class="toolbar-right">
+      <button id="pwaInstallBtn" onclick="installPWA()" style="display:none;" title="安装到桌面">📲 安装</button>
       <button onclick="exportData()">📤 备份</button>
       <button onclick="document.getElementById('importInput').click()">📥 恢复</button>
     </div>
@@ -1850,6 +1862,68 @@
 
 <script>
 // ========== PWA 支持 ==========
+let deferredPrompt = null;
+let pwaInstallBtn = null;
+
+// 检测是否已安装为 PWA（standalone 模式）
+function isPWAInstalled() {
+  return window.matchMedia('(display-mode: standalone)').matches || navigator.standalone;
+}
+
+// 检测是否为 iOS
+function isIOS() {
+  return /iphone|ipad|ipod/.test(navigator.userAgent.toLowerCase());
+}
+
+// 显示安装按钮
+function showInstallBtn() {
+  if (pwaInstallBtn) pwaInstallBtn.style.display = '';
+}
+
+// 点击安装按钮
+function installPWA() {
+  if (deferredPrompt) {
+    // Android/Chrome: 弹出原生安装提示
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(choice => {
+      if (choice.outcome === 'accepted') {
+        if (pwaInstallBtn) pwaInstallBtn.style.display = 'none';
+      }
+      deferredPrompt = null;
+    });
+  } else if (isIOS()) {
+    // iOS: 显示引导说明
+    showIosInstallGuide();
+  }
+}
+
+// iOS 安装引导弹窗
+function showIosInstallGuide() {
+  const overlay = document.createElement('div');
+  overlay.className = 'modal-overlay';
+  overlay.id = 'iosGuideOverlay';
+  overlay.style.display = 'flex';
+  overlay.innerHTML = `
+    <div class="modal" style="max-width:400px;text-align:center;">
+      <div class="modal-header">
+        <div class="modal-title">📱 添加到桌面</div>
+        <button class="modal-close" onclick="document.getElementById('iosGuideOverlay').remove()">×</button>
+      </div>
+      <div class="modal-body" style="text-align:left;line-height:2;padding:20px;">
+        <p>Safari 浏览器不支持自动弹出安装提示，请按以下步骤操作：</p>
+        <p>1️⃣ 点击底部工具栏的 <b>分享按钮</b> <span style="font-size:1.2em;">⎋</span></p>
+        <p>2️⃣ 向下滑动，找到并点击 <b>「添加到主屏幕」</b></p>
+        <p>3️⃣ 点击右上角 <b>「添加」</b> 即可完成</p>
+        <div style="text-align:center;margin-top:12px;color:#888;font-size:13px;">安装后可在桌面像原生 App 一样打开亲子打卡</div>
+      </div>
+    </div>
+  `;
+  document.body.appendChild(overlay);
+  overlay.addEventListener('click', function(e) {
+    if (e.target === overlay) overlay.remove();
+  });
+}
+
 if ('serviceWorker' in navigator) {
   const swCode = `
     self.addEventListener('install', e => {
@@ -1873,6 +1947,37 @@ if ('serviceWorker' in navigator) {
   const blob = new Blob([swCode], { type: 'text/javascript' });
   const swUrl = URL.createObjectURL(blob);
   navigator.serviceWorker.register(swUrl).catch(() => {});
+}
+
+// 监听 beforeinstallprompt（Chrome/Android 会在合适时机触发）
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  if (!isPWAInstalled()) showInstallBtn();
+});
+
+// 如果已安装则隐藏按钮
+window.addEventListener('appinstalled', () => {
+  if (pwaInstallBtn) pwaInstallBtn.style.display = 'none';
+  deferredPrompt = null;
+});
+
+// DOM 加载后获取按钮引用
+function initPwaInstallBtn() {
+  pwaInstallBtn = document.getElementById('pwaInstallBtn');
+  // iOS 且在 Safari 中且未安装：显示安装按钮
+  if (isIOS() && !isPWAInstalled() && !deferredPrompt) {
+    showInstallBtn();
+  }
+  // 如果已安装则隐藏
+  if (isPWAInstalled() && pwaInstallBtn) {
+    pwaInstallBtn.style.display = 'none';
+  }
+}
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initPwaInstallBtn);
+} else {
+  initPwaInstallBtn();
 }
 
 // ========== 默认配置 ==========
