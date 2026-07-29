@@ -15,13 +15,13 @@
 - PWA：内联 manifest + Service Worker，支持离线缓存和桌面安装
 
 ## 目录与约定
-- `index.html` — 唯一源文件（~4510行）
+- `index.html` — 唯一源文件（~4520行）
 - `icon-192.png` / `icon-512.png` — PWA 桌面图标
 - `.github/workflows/deploy.yml` — 自动部署
 - 无构建步骤，无 node_modules
 
 ## 当前状态
-- v5.1：PWA 自定义安装按钮（beforeinstallprompt + iOS 引导弹窗）
+- v5.1：里程碑对齐修复、任务数统计修正、庆祝弹窗优化；PWA 自定义安装按钮（beforeinstallprompt + iOS 引导弹窗）
 - v5.0：PWA 支持、品牌更名"亲子打卡"、任务生效日期管理器、历史数据保护、代码健壮性修复
 - v4.0：多账号切换（家庭多孩各自独立账号）
 - 帮助说明页（功能/使用/更新）、首次欢迎引导
