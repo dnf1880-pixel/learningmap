@@ -527,9 +527,8 @@
     position: relative;
   }
   .milestone-nodes {
-    display: flex;
-    justify-content: space-between;
     position: relative;
+    min-height: 48px;
     margin-top: 8px;
   }
   .milestone-node {
@@ -537,8 +536,10 @@
     flex-direction: column;
     align-items: center;
     gap: 4px;
-    position: relative;
-    flex: 1;
+    position: absolute;
+    top: 0;
+    transform: translateX(-50%);
+    min-width: 40px;
   }
   .milestone-node .dot {
     width: 14px;
@@ -2514,18 +2515,19 @@ function getMilestoneDates() {
 function checkMilestones() {
   const meta = ensureMeta();
   const fullDays = getFullDoneDays();
-  let newClaim = false;
+  let newClaimDays = [];
   getMilestones().forEach(m => {
     if (fullDays >= m.days && !meta.milestonesClaimed.includes(String(m.days))) {
       meta.milestonesClaimed.push(String(m.days));
       addTransaction('earn', m.reward, `连续点亮 ${m.days} 天奖励`, { milestone: m.days });
-      newClaim = true;
+      newClaimDays.push(m);
     }
   });
-  if (newClaim) {
+  if (newClaimDays.length > 0) {
     saveData();
     renderAll();
-    showCelebration('🏆', '里程碑达成！', '恭喜子菡解锁额外星星奖励！');
+    const m = newClaimDays[newClaimDays.length - 1];
+    showCelebration('🏆', `连续 ${m.days} 天达成！`, `奖励 +${m.reward}⭐ 太厉害了，继续保持！`);
     spawnStars();
   }
 }
@@ -3014,10 +3016,11 @@ function renderOverview() {
   const settings = getSettings();
   const fullDays = getFullDoneDays();
   const milestones = getMilestones();
-  const maxDays = milestones.length > 0 ? milestones[milestones.length - 1].days : 15;
+  const challengeDays = getDateRange(getChallengeStart(), getChallengeEnd()).length;
+  const maxDays = Math.max(challengeDays, milestones.length > 0 ? milestones[milestones.length - 1].days : 15);
 
   document.getElementById('mapTitleText').textContent = settings.mapTitle || DEFAULT_MAP_TITLE;
-  document.getElementById('mapSubtitle').textContent = `${formatDateRange()} · 完成全部${getTasks().length}项点亮一天`;
+  document.getElementById('mapSubtitle').textContent = `${formatDateRange()} · 完成全部${getEffectiveTasks(currentDate).length}项点亮一天`;
 
   // 里程碑进度条
   let milestoneHtml = `
@@ -3034,8 +3037,9 @@ function renderOverview() {
   milestones.forEach(m => {
     const reached = fullDays >= m.days;
     const claimed = ensureMeta().milestonesClaimed.includes(String(m.days));
+    const left = Math.min(100, (m.days / maxDays) * 100);
     milestoneHtml += `
-      <div class="milestone-node ${reached ? 'reached' : ''} ${claimed ? 'claimed' : ''}">
+      <div class="milestone-node ${reached ? 'reached' : ''} ${claimed ? 'claimed' : ''}" style="left: ${left}%;">
         <div class="dot" title="${m.days}天奖励"></div>
         <div class="label">${m.days}天</div>
         <div class="reward">+${m.reward}星</div>
