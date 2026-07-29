@@ -28,6 +28,14 @@
 - 云端账号系统：注册/登录/登出，密码哈希存储
 - Token 占位符 `__GIST_TOKEN__` 由 Actions 部署时替换
 
+## 版本管理铁律
+- **只有两个版本**：`index.html`（主线）和 `/tmp/skin_backup/index.html`（皮肤备份）
+- **默认始终在主线 `index.html` 上工作**，除非用户明确说"皮肤版本"或"备份版本"
+- **严禁自作主张切换版本**：用户没提皮肤/备份，就只碰主线
+- **重大改动前先备份**：`cp index.html index.html.bak`，完成后确认无误再决定是否保留备份
+- **备份文件用途单一**：`index.html.bak` 仅用于紧急回滚，不是开发分支
+- **皮肤备份在 `/tmp/skin_backup/`**：与主线完全隔离，只有用户明确说"搞皮肤"才去动
+
 ## 注意事项
 - 严禁在任何命令或回复中暴露 GitHub Token 明文，始终用环境变量引用
 - 部署通过 push master → GitHub Actions 自动完成
